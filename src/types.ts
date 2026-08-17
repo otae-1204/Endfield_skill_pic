@@ -17,10 +17,34 @@ export type TokenStyle =
   | "number"
   | "link";
 
+export const MANUAL_STYLE_IDS = [
+  "plain",
+  "bl.key",
+  "gd.key",
+  "ba.key",
+  "ss.key",
+  "ba.vup",
+  "ba.vdown",
+  "ba.heal",
+  "ba.natur",
+  "ba.fire",
+  "ba.cryst",
+  "ba.pulse",
+  "ba.phy",
+  "ba.ether",
+  "ba.info",
+  "underline",
+  "link",
+  "bold",
+] as const;
+
+export type ManualStyleId = (typeof MANUAL_STYLE_IDS)[number];
+
 export type RichToken = {
   text: string;
   style: TokenStyle;
   manual?: boolean;
+  manualStyleId?: ManualStyleId;
   richTextId?: string;
   tagKind?: "@" | "#";
   iconSrc?: string;
@@ -49,7 +73,7 @@ export type SkillCard = {
 };
 
 export type RenderSettings = {
-  baseWidth: 378;
+  baseWidth: 400;
   scale: 1 | 2;
   transparentCorners: true;
 };

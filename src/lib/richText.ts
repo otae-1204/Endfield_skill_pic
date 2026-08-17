@@ -1,9 +1,15 @@
 import {
+  GAME_RICH_TEXT_COLORS,
   localizeRichTextIcon,
   lookupRichTextMeta,
   type GameRichTextMeta,
 } from "../data/gameRichText";
-import type { RichToken, TokenStyle } from "../types";
+import {
+  MANUAL_STYLE_IDS,
+  type ManualStyleId,
+  type RichToken,
+  type TokenStyle,
+} from "../types";
 
 export const TOKEN_LABELS: Record<TokenStyle, string> = {
   plain: "正文",
@@ -14,33 +20,73 @@ export const TOKEN_LABELS: Record<TokenStyle, string> = {
   link: "链接",
 };
 
-// Base semantic palette from the FZ Wiki game-richtext style table.
+// Skill-panel palette from skill_text_color_rendering.md.
 export const TOKEN_COLORS: Record<TokenStyle, string> = {
-  plain: "#c8c8c6",
-  damage: "#ffcc00",
-  state: "#33c2ff",
-  healing: "#ade131",
-  number: "#ffd399",
-  link: "#33c2ff",
+  plain: "#D6D6D6",
+  damage: "#FFCC00",
+  state: "#33C2FF",
+  healing: "#B4D945",
+  number: "#9EB7FF",
+  link: "#33C2FF",
 };
+
+export type ManualStylePreset = {
+  label: string;
+  color: string;
+  style: TokenStyle;
+  underline?: boolean;
+  bold?: boolean;
+  preserveFormatting?: boolean;
+};
+
+export const MANUAL_STYLE_PRESETS: Record<ManualStyleId, ManualStylePreset> = {
+  plain: { label: "正文", color: TOKEN_COLORS.plain, style: "plain" },
+  "bl.key": { label: "重要黄", color: GAME_RICH_TEXT_COLORS["bl.key"], style: "damage" },
+  "gd.key": { label: "关键词黄", color: GAME_RICH_TEXT_COLORS["gd.key"], style: "damage" },
+  "ba.key": { label: "战斗蓝", color: GAME_RICH_TEXT_COLORS["ba.key"], style: "state" },
+  "ss.key": { label: "关键词蓝", color: GAME_RICH_TEXT_COLORS["ss.key"], style: "state" },
+  "ba.vup": { label: "增益", color: GAME_RICH_TEXT_COLORS["ba.vup"], style: "number" },
+  "ba.vdown": { label: "减益", color: GAME_RICH_TEXT_COLORS["ba.vdown"], style: "number" },
+  "ba.heal": { label: "治疗", color: GAME_RICH_TEXT_COLORS["ba.heal"], style: "healing" },
+  "ba.natur": { label: "自然", color: GAME_RICH_TEXT_COLORS["ba.natur"], style: "healing" },
+  "ba.fire": { label: "灼热", color: GAME_RICH_TEXT_COLORS["ba.fire"], style: "damage" },
+  "ba.cryst": { label: "寒冷", color: GAME_RICH_TEXT_COLORS["ba.cryst"], style: "damage" },
+  "ba.pulse": { label: "电磁", color: GAME_RICH_TEXT_COLORS["ba.pulse"], style: "damage" },
+  "ba.phy": { label: "物理", color: GAME_RICH_TEXT_COLORS["ba.phy"], style: "damage" },
+  "ba.ether": { label: "以太", color: GAME_RICH_TEXT_COLORS["ba.ether"], style: "state" },
+  "ba.info": { label: "说明", color: GAME_RICH_TEXT_COLORS["ba.info"], style: "plain" },
+  underline: {
+    label: "下划线",
+    color: TOKEN_COLORS.plain,
+    style: "plain",
+    underline: true,
+    preserveFormatting: true,
+  },
+  link: { label: "链接", color: GAME_RICH_TEXT_COLORS["ba.key"], style: "link", underline: true },
+  bold: { label: "粗体", color: TOKEN_COLORS.plain, style: "plain", bold: true },
+};
+
+export const MANUAL_STYLE_OPTIONS = [...MANUAL_STYLE_IDS];
 
 type AutoRule = {
   word: string;
   style: TokenStyle;
   richTextId?: string;
   overrideStyle?: boolean;
+  underline?: boolean;
 };
 
 const AUTO_RULES: AutoRule[] = [
-  { word: "电磁附着", style: "damage", richTextId: "ba.pulseinflict" },
-  { word: "灼热附着", style: "damage", richTextId: "ba.fireinflict" },
-  { word: "寒冷附着", style: "damage", richTextId: "ba.crystinflict" },
-  { word: "自然附着", style: "healing", richTextId: "ba.naturalinflict" },
+  { word: "电磁附着", style: "damage", richTextId: "ba.pulseinflict", underline: true },
+  { word: "灼热附着", style: "damage", richTextId: "ba.fireinflict", underline: true },
+  { word: "寒冷附着", style: "damage", richTextId: "ba.crystinflict", underline: true },
+  { word: "自然附着", style: "healing", richTextId: "ba.naturalinflict", underline: true },
   {
     word: "法术附着",
     style: "state",
     richTextId: "ba.spellinflict",
     overrideStyle: true,
+    underline: true,
   },
   { word: "电磁脆弱", style: "damage", richTextId: "ba.pulsevul" },
   { word: "灼热脆弱", style: "damage", richTextId: "ba.firevul" },
@@ -55,6 +101,7 @@ const AUTO_RULES: AutoRule[] = [
     overrideStyle: true,
   },
   { word: "虚弱", style: "state", richTextId: "ba.weak", overrideStyle: true },
+  { word: "缓速", style: "link", richTextId: "ba.slow", underline: true },
   { word: "电磁增幅", style: "damage", richTextId: "ba.pulseenhance" },
   { word: "灼热增幅", style: "damage", richTextId: "ba.fireenhance" },
   { word: "寒冷增幅", style: "damage", richTextId: "ba.crystenhance" },
@@ -74,9 +121,10 @@ const AUTO_RULES: AutoRule[] = [
   { word: "自然伤害", style: "healing", richTextId: "ba.natur" },
   { word: "物理伤害", style: "damage", richTextId: "ba.phy" },
   { word: "电磁", style: "damage", richTextId: "ba.pulse" },
-  { word: "导电", style: "damage", richTextId: "ba.conduct" },
-  { word: "燃烧", style: "damage", richTextId: "ba.burning" },
-  { word: "冻结", style: "damage", richTextId: "ba.frozen" },
+  { word: "导电", style: "damage", richTextId: "ba.conduct", underline: true },
+  { word: "腐蚀", style: "healing", richTextId: "ba.corrupt", underline: true },
+  { word: "燃烧", style: "damage", richTextId: "ba.burning", underline: true },
+  { word: "冻结", style: "damage", richTextId: "ba.frozen", underline: true },
   { word: "破防", style: "state", richTextId: "ba.noguard" },
   { word: "击飞", style: "state", richTextId: "ba.airborne" },
   { word: "倒地", style: "state", richTextId: "ba.knockdown" },
@@ -96,7 +144,12 @@ const AUTO_RULES: AutoRule[] = [
   { word: "异常", style: "state", richTextId: "ba.key" },
   { word: "姿态", style: "state", richTextId: "ba.key" },
   { word: "状态", style: "state", richTextId: "ba.key" },
-  { word: "法术异常", style: "link", richTextId: "ba.spellinflict" },
+  {
+    word: "法术异常",
+    style: "link",
+    richTextId: "ba.spellinflict",
+    underline: true,
+  },
   { word: "重击", style: "link", richTextId: "ba.key" },
   { word: "战技", style: "link", richTextId: "ba.key" },
   { word: "连携技", style: "link", richTextId: "ba.key" },
@@ -111,7 +164,7 @@ const SORTED_AUTO_RULES = [...AUTO_RULES].sort(
 function styleForMeta(meta: GameRichTextMeta, tagKind?: "@" | "#"): TokenStyle {
   if (meta.semantic) return meta.semantic;
   if (tagKind === "#") return "link";
-  return "state";
+  return "plain";
 }
 
 function tokenFromMeta(
@@ -144,6 +197,7 @@ function sameTokenMeta(left: RichToken, right: RichToken): boolean {
   return (
     left.style === right.style &&
     left.manual === right.manual &&
+    left.manualStyleId === right.manualStyleId &&
     left.richTextId === right.richTextId &&
     left.tagKind === right.tagKind &&
     left.iconSrc === right.iconSrc &&
@@ -176,6 +230,7 @@ function autoTokenAt(text: string, index: number): { length: number; token: Rich
       source: "auto",
     });
     if (rule.overrideStyle) token.style = rule.style;
+    if (rule.underline) token.underline = true;
     return {
       length: rule.word.length,
       token,
@@ -200,7 +255,7 @@ function autoTokenAt(text: string, index: number): { length: number; token: Rich
   };
 }
 
-type RichContext = RichToken & { tagKind: "@" | "#"; richTextId: string };
+type RichContext = RichToken & { tagKind?: "@" | "#"; richTextId: string };
 
 function parseAutomaticSegment(text: string, tokens: RichToken[]): void {
   let index = 0;
@@ -216,7 +271,7 @@ function parseTaggedSegment(text: string, context: RichContext, tokens: RichToke
   pushToken(tokens, { ...context, text, source: "api" });
 }
 
-const RICH_TAG_RE = /<image\s*=\s*"([^"]+)"(?:\s+scale\s*=\s*([\d.]+))?\s*\/?>|<([@#])([a-z0-9_.-]+)>|<\/>/gi;
+const RICH_TAG_RE = /<image\s*=\s*"([^"]+)"(?:\s+scale\s*=\s*([\d.]+))?\s*\/?>|<([@#])([a-z0-9_.-]+)>|(<\/?b>)|<\/>/gi;
 
 /** Parse plain Chinese text and the API's <@id> / <#id> / <image="..."> syntax. */
 export function parseRichText(text: string): RichToken[] {
@@ -250,6 +305,16 @@ export function parseRichText(text: string): RichToken[] {
         tagKind,
         richTextId: match[4],
       });
+    } else if (match[5]?.toLowerCase() === "<b>") {
+      stack.push({
+        text: "",
+        style: "plain",
+        bold: true,
+        source: "api",
+        richTextId: "html.bold",
+      });
+    } else if (match[5]?.toLowerCase() === "</b>" && stack.length) {
+      stack.pop();
     } else if (fullMatch === "</>" && stack.length) {
       stack.pop();
     }
@@ -271,6 +336,9 @@ export function tokensToText(tokens: RichToken[]): string {
 export function tokensToEditorText(tokens: RichToken[]): string {
   return tokens
     .map((token) => {
+      if (token.source === "api" && token.bold && token.richTextId === "html.bold") {
+        return `<b>${token.text}</b>`;
+      }
       if (token.source === "api" && token.richTextId && token.tagKind) {
         return `<${token.tagKind}${token.richTextId}>${token.text}</>`;
       }
@@ -280,6 +348,80 @@ export function tokensToEditorText(tokens: RichToken[]): string {
       return token.text;
     })
     .join("");
+}
+
+type ManualRange = {
+  start: number;
+  end: number;
+  manualStyleId?: ManualStyleId;
+  style: TokenStyle;
+};
+
+function manualRanges(tokens: RichToken[]): ManualRange[] {
+  const ranges: ManualRange[] = [];
+  let offset = 0;
+  for (const token of tokens) {
+    const end = offset + token.text.length;
+    if (token.manual && end > offset) {
+      ranges.push({
+        start: offset,
+        end,
+        manualStyleId: token.manualStyleId,
+        style: token.style,
+      });
+    }
+    offset = end;
+  }
+  return ranges;
+}
+
+/** Reparse edited text while carrying manual annotations across unchanged text. */
+export function updateRichTextPreservingManual(
+  previousTokens: RichToken[],
+  nextEditorText: string,
+): RichToken[] {
+  let nextTokens = parseRichText(nextEditorText);
+  const ranges = manualRanges(previousTokens);
+  if (!ranges.length) return nextTokens;
+
+  const previousText = tokensToText(previousTokens);
+  const nextText = tokensToText(nextTokens);
+  let prefix = 0;
+  const prefixLimit = Math.min(previousText.length, nextText.length);
+  while (prefix < prefixLimit && previousText[prefix] === nextText[prefix]) prefix += 1;
+
+  let suffix = 0;
+  const suffixLimit = Math.min(previousText.length - prefix, nextText.length - prefix);
+  while (
+    suffix < suffixLimit &&
+    previousText[previousText.length - 1 - suffix] === nextText[nextText.length - 1 - suffix]
+  ) {
+    suffix += 1;
+  }
+
+  const previousEditEnd = previousText.length - suffix;
+  const nextEditEnd = nextText.length - suffix;
+  const delta = nextText.length - previousText.length;
+  const mapStart = (position: number): number => {
+    if (position <= prefix) return position;
+    if (position >= previousEditEnd) return position + delta;
+    return prefix;
+  };
+  const mapEnd = (position: number): number => {
+    if (position <= prefix) return position;
+    if (position >= previousEditEnd) return position + delta;
+    return nextEditEnd;
+  };
+
+  for (const range of ranges) {
+    const start = Math.max(0, Math.min(nextText.length, mapStart(range.start)));
+    const end = Math.max(start, Math.min(nextText.length, mapEnd(range.end)));
+    if (end <= start) continue;
+    nextTokens = range.manualStyleId
+      ? applyManualPreset(nextTokens, start, end, range.manualStyleId)
+      : applyManualStyle(nextTokens, start, end, range.style);
+  }
+  return nextTokens;
 }
 
 export function applyManualStyle(
@@ -324,6 +466,72 @@ export function applyManualStyle(
   return result;
 }
 
+export function applyManualPreset(
+  tokens: RichToken[],
+  start: number,
+  end: number,
+  manualStyleId: ManualStyleId,
+): RichToken[] {
+  if (end <= start) return tokens;
+  const preset = MANUAL_STYLE_PRESETS[manualStyleId];
+  const result: RichToken[] = [];
+  let offset = 0;
+
+  for (const token of tokens) {
+    const tokenStart = offset;
+    const tokenEnd = offset + token.text.length;
+    const overlapStart = Math.max(start, tokenStart);
+    const overlapEnd = Math.min(end, tokenEnd);
+
+    if (overlapStart >= overlapEnd) {
+      pushToken(result, token);
+      offset = tokenEnd;
+      continue;
+    }
+
+    const before = token.text.slice(0, overlapStart - tokenStart);
+    const selected = token.text.slice(overlapStart - tokenStart, overlapEnd - tokenStart);
+    const after = token.text.slice(overlapEnd - tokenStart);
+
+    if (before) pushToken(result, { ...token, text: before });
+    if (preset.preserveFormatting) {
+      const selectedToken = { ...token };
+      if (before) {
+        delete selectedToken.iconSrc;
+        delete selectedToken.iconScale;
+      }
+      pushToken(result, {
+        ...selectedToken,
+        text: selected,
+        manual: true,
+        manualStyleId,
+        underline: true,
+        source: "manual",
+      });
+    } else {
+      pushToken(result, {
+        text: selected,
+        style: preset.style,
+        manual: true,
+        manualStyleId,
+        color: preset.color,
+        source: "manual",
+        ...(preset.underline ? { underline: true } : {}),
+        ...(preset.bold ? { bold: true } : {}),
+      });
+    }
+    if (after) {
+      const afterToken = { ...token };
+      delete afterToken.iconSrc;
+      delete afterToken.iconScale;
+      pushToken(result, { ...afterToken, text: after });
+    }
+    offset = tokenEnd;
+  }
+
+  return result;
+}
+
 export function tokenClass(style: TokenStyle): string {
   return `rich-token rich-token-${style}`;
 }
@@ -337,6 +545,10 @@ export function isTokenStyle(value: unknown): value is TokenStyle {
     value === "number" ||
     value === "link"
   );
+}
+
+export function isManualStyleId(value: unknown): value is ManualStyleId {
+  return typeof value === "string" && MANUAL_STYLE_IDS.includes(value as ManualStyleId);
 }
 
 export function plainTextToTokens(text: string): RichToken[] {

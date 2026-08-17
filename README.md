@@ -4,6 +4,8 @@
 
 界面与技能卡正文使用《明日方舟：终末地》UI 同款的 HarmonyOS Sans SC。项目内嵌未修改的 Regular、Medium、Bold 字重；字体版权归 Huawei Device Co., Ltd. 所有，完整许可见 [`public/assets/fonts/LICENSE-HarmonyOS-Sans.txt`](public/assets/fonts/LICENSE-HarmonyOS-Sans.txt)。
 
+技能卡字体参数按 `skill_text_font_rendering.md` 以约 `0.6` Canvas 比例复刻：标题 `18px`、类型 `15.4px`、Rank `14.4px`、正文/节点 `15.6px`、底部属性 `18px`。由于 HarmonyOS Sans SC Regular 比游戏 `defaultfont_cn.ttf` 视觉更粗，常规 `400` 映射到 Light 字形并增加 `0.12px` 轻描边作视觉补偿；仅 `<b>` 与 `<@intru.bold>` 使用 Bold `700`。
+
 ## 本地网页预览
 
 ```powershell
@@ -23,9 +25,9 @@ npm run preview
 ## 功能约定
 
 - 六个槽位固定为普通攻击、战技、连携技、终结技、天赋节点 A、天赋节点 B；每张卡的标题和右上角类型都可以改。
-- 正文通过关键词规则自动着色，也可以在工具栏中选中文本后手动标注。手动标注会优先保留在当前文本中。
-- 颜色采用 AKEData 技能详情页的语义色：伤害黄 `#ffcc00`、状态/链接蓝 `#00a8ff`、治疗/自然绿 `#ade131`、数值暖色 `#ffd399`。
-- 卡片固定基准宽度 378px，内容自动增高；输出倍率为 1× 或 2×，四角保持透明圆角。
+- 正文通过关键词规则自动着色，也可以在工具栏中选中文本后使用 18 种精确预设手动标注，包括重要黄、关键词黄/蓝、战斗蓝、增益、减益、治疗、自然、灼热、寒冷、电磁、物理、以太、说明、下划线、链接、粗体和正文。手动标注会优先保留在当前文本中。
+- 颜色按 `skill_text_color_rendering.md` 的悬浮技能面板 `preDef[0]` 渲染：正文浅灰 `#D6D6D6`、电磁黄 `#FFCC00`、战斗蓝 `#33C2FF`、增益蓝紫 `#9EB7FF`、治疗/自然绿 `#B4D945`；未知标签保持当前正文色。纯白 `#FFFFFF` 仅用于角色页面展开后的大详情面板正文。
+- 卡片固定基准宽度 400px，内容自动增高；输出倍率为 1× 或 2×，四角保持透明圆角。
 - PNG 采用渲染预览共用的 DOM，等待本地字体加载后再生成；导出异常会提示错误且不会清空草稿。
 
 ## Tauri 2 桌面与 Android
@@ -61,7 +63,7 @@ Tauri 的 Android 构建需要 Android SDK、NDK、Java 和 Rust Android targets
       "body": [{ "text": "电磁伤害", "style": "damage" }]
     }
   ],
-  "render": { "baseWidth": 378, "scale": 2, "transparentCorners": true }
+  "render": { "baseWidth": 400, "scale": 2, "transparentCorners": true }
 }
 ```
 

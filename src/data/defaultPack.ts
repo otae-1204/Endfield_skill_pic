@@ -40,7 +40,7 @@ const draftCards: DraftCard[] = [
   },
   {
     slot: "talentA",
-    title: "天球造化",
+    title: "天地造化",
     typeLabel: "天赋",
     subtitle: "节点",
     nodeMarks: 2,
@@ -63,7 +63,7 @@ export const DEFAULT_PACK: SkillPack = {
     body: parseRichText(body),
   })) as SkillPack["cards"],
   render: {
-    baseWidth: 378,
+    baseWidth: 400,
     scale: 1,
     transparentCorners: true,
   },
@@ -77,4 +77,3 @@ export const SLOT_LABELS: Record<SkillSlot, string> = {
   talentA: "天赋节点 A",
   talentB: "天赋节点 B",
 };
-

@@ -1,4 +1,5 @@
 import { forwardRef, type MouseEvent } from "react";
+import { GAME_RICH_TEXT_ICON_SCALE } from "../data/gameRichText";
 import type { SkillCard as SkillCardData, RichToken } from "../types";
 import { tokenClass } from "../lib/richText";
 
@@ -37,12 +38,25 @@ function SkillMastery({ rank }: { rank: number }) {
   );
 }
 
+function renderedIconScale(token: RichToken): number {
+  if (token.source === "image") return token.iconScale ?? 1;
+  // Apply these by id as well as in metadata so an open HMR-preserved draft
+  // receives the correction without needing to be reparsed or reloaded.
+  if (token.richTextId === "ba.naturalinflict") return 1.5;
+  return GAME_RICH_TEXT_ICON_SCALE;
+}
+
+function renderedIconTransform(token: RichToken): string {
+  const offsetY = token.richTextId === "ba.crystinflict" ? -1 : 0;
+  return `translateY(${offsetY}px) scale(${renderedIconScale(token)})`;
+}
+
 function RichTokenView({ token, piece, pieceIndex }: { token: RichToken; piece: string; pieceIndex: number }) {
   const colorStyle = token.color ? { color: token.color } : undefined;
   const textStyle = {
     ...colorStyle,
     textDecorationLine: token.underline ? ("underline" as const) : undefined,
-    fontWeight: token.bold ? 650 : undefined,
+    fontWeight: token.bold ? 700 : undefined,
   };
   return (
     <span className={tokenClass(token.style)} style={textStyle} data-manual={token.manual ? "true" : undefined}>
@@ -52,7 +66,7 @@ function RichTokenView({ token, piece, pieceIndex }: { token: RichToken; piece: 
           src={token.iconSrc}
           alt=""
           aria-hidden="true"
-          style={{ transform: `scale(${token.iconScale ?? 1})` }}
+          style={{ transform: renderedIconTransform(token) }}
         />
       ) : null}
       {piece}
@@ -73,7 +87,7 @@ function RichBody({ tokens }: { tokens: RichToken[] }) {
                 src={token.iconSrc}
                 alt=""
                 aria-hidden="true"
-                style={{ transform: `scale(${token.iconScale ?? 1})` }}
+                style={{ transform: renderedIconTransform(token) }}
               />
             </span>
           );
@@ -93,6 +107,7 @@ function RichBody({ tokens }: { tokens: RichToken[] }) {
 
 export const SkillCardView = forwardRef<HTMLDivElement, SkillCardProps>(
   function SkillCardView({ card, selected = false, onSelect }, ref) {
+    const isTalent = card.slot === "talentA" || card.slot === "talentB";
     const handleClick = (event: MouseEvent<HTMLDivElement>) => {
       event.stopPropagation();
       onSelect?.();
@@ -101,7 +116,7 @@ export const SkillCardView = forwardRef<HTMLDivElement, SkillCardProps>(
     return (
       <div
         ref={ref}
-        className={`skill-card${selected ? " is-selected" : ""}`}
+        className={`skill-card${isTalent ? " skill-card--talent" : ""}${selected ? " is-selected" : ""}`}
         data-testid={`skill-card-${card.slot}`}
         data-slot={card.slot}
         onClick={handleClick}
@@ -122,6 +137,32 @@ export const SkillCardView = forwardRef<HTMLDivElement, SkillCardProps>(
         <div className="skill-card-header">
           <div className="skill-card-title-block">
             <div className="skill-card-title">{card.title || "未命名技能"}</div>
+            {isTalent && card.subtitle ? (
+              <>
+                <span className="node-rank-decoration" aria-hidden="true">
+                  <span className="node-decoration-ring" />
+                  <span className="node-decoration-track">
+                    <img src="/assets/charinfo/deco_skillline_08.png" alt="" />
+                    <span className="rank-decoration-cracks">
+                      <i className="rank-crack rank-crack-1" />
+                      <i className="rank-crack rank-crack-2" />
+                      <i className="rank-crack rank-crack-3" />
+                      <i className="rank-crack rank-crack-4" />
+                    </span>
+                  </span>
+                </span>
+                <div className="skill-card-subtitle skill-card-subtitle--header">
+                  <span>{card.subtitle}</span>
+                  {card.nodeMarks ? (
+                    <span className="node-marks" aria-label={`${card.nodeMarks} 个节点标记`}>
+                      {Array.from({ length: card.nodeMarks }).map((_, index) => (
+                        <i key={index} />
+                      ))}
+                    </span>
+                  ) : null}
+                </div>
+              </>
+            ) : null}
             {card.rank !== undefined && (
               <div className="skill-card-rank-line">
                 <span className="rank-decoration-layer" aria-hidden="true">
@@ -149,15 +190,17 @@ export const SkillCardView = forwardRef<HTMLDivElement, SkillCardProps>(
             )}
           </div>
           <div className="skill-card-kind">{card.typeLabel || "技能"}</div>
-          <div className="skill-card-chevron" aria-hidden="true">
-            <span />
-            <span />
-          </div>
+          {!isTalent ? (
+            <div className="skill-card-chevron" aria-hidden="true">
+              <span />
+              <span />
+            </div>
+          ) : null}
         </div>
 
         <div className="skill-card-divider" />
 
-        {card.subtitle && (
+        {!isTalent && card.subtitle && (
           <div className="skill-card-subtitle">
             <span>{card.subtitle}</span>
             {card.nodeMarks ? (

@@ -2,7 +2,7 @@
 
 正式素材请放在这个目录或 `src-tauri/icons/`：
 
-- 字体文件：`fonts/` 内已包含并注册 HarmonyOS Sans SC 的 Regular、Medium、Bold 原始字体文件及完整许可协议。
+- 字体文件：`fonts/` 内包含 HarmonyOS Sans SC 的 Light、Regular、Medium、Bold 原始文件及完整许可协议；技能卡常规 `400` 使用 Light 字形作视觉粗细补偿。
 - 技能图标：建议使用原始 SVG/PNG，并在 `SkillCardView` 中按槽位接入。
 - 边框、纹理、背景：优先使用无损文件；截图只作为布局 golden fixture，不作为正式素材。
 

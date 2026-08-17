@@ -1,5 +1,13 @@
 @font-face {
   font-family: "HarmonyOS Sans SC";
+  src: url("/assets/fonts/HarmonyOS_Sans_SC_Light.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "HarmonyOS Sans SC Regular";
   src: url("/assets/fonts/HarmonyOS_Sans_SC_Regular.ttf") format("truetype");
   font-style: normal;
   font-weight: 400;
@@ -657,7 +665,7 @@ textarea:focus-visible {
 
 .preview-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(378px, 1fr));
+  grid-template-columns: repeat(2, minmax(400px, 1fr));
   gap: 40px 26px;
   align-items: start;
   max-width: 1140px;
@@ -707,18 +715,18 @@ textarea:focus-visible {
   left: -20000px;
   display: grid;
   gap: 20px;
-  width: 378px;
+  width: 400px;
   pointer-events: none;
 }
 
 .export-stage-card {
-  width: 378px;
+  width: 400px;
 }
 
-/* The rendered card is deliberately kept at the screenshot's 378px base width. */
+/* The rendered card uses the same 400px base width in preview and export. */
 .skill-card {
   position: relative;
-  width: 378px;
+  width: 400px;
   min-height: 100px;
   overflow: hidden;
   border: 1px solid rgba(195, 197, 190, 0.38);
@@ -730,8 +738,14 @@ textarea:focus-visible {
     0 13px 30px rgba(0, 0, 0, 0.23),
     inset 0 1px 0 rgba(255, 255, 255, 0.12),
     inset 0 -1px 0 rgba(0, 0, 0, 0.5);
-  color: #c8c8c6;
+  color: #d6d6d6;
   cursor: pointer;
+  font-style: normal;
+  font-weight: 400;
+  font-kerning: normal;
+  letter-spacing: 0;
+  word-spacing: 0;
+  -webkit-text-stroke: 0.12px currentColor;
   isolation: isolate;
 }
 
@@ -798,7 +812,7 @@ textarea:focus-visible {
   top: 0;
   left: 10px;
   width: 40px;
-  height: 8px;
+  height: 6px;
   object-fit: contain;
   object-position: left center;
   opacity: 0.14;
@@ -814,18 +828,36 @@ textarea:focus-visible {
 }
 
 .skill-card-title-block {
+  position: relative;
   min-width: 0;
 }
 
 .skill-card-title {
   overflow: hidden;
-  color: #c8c8c6;
-  font-size: 17px;
-  font-weight: 500;
-  letter-spacing: 0.01em;
+  color: #d6d6d6;
+  font-family: "HarmonyOS Sans SC Regular", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0;
   line-height: 1.15;
   text-overflow: ellipsis;
+  -webkit-text-stroke: 0;
   white-space: nowrap;
+}
+
+.skill-card--talent .skill-card-header {
+  min-height: 72px;
+  padding: 18px 10px 2px;
+}
+
+.skill-card--talent .skill-card-title {
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.12;
+}
+
+.skill-card--talent .skill-card-divider {
+  margin-top: 0;
 }
 
 .skill-card-rank-line {
@@ -964,12 +996,12 @@ textarea:focus-visible {
   top: 10px;
   left: 27px;
   display: inline-block;
-  color: #a8a8a6;
+  color: rgba(255, 255, 255, 0.6);
   font-family: "HarmonyOS Sans SC", Arial, "Microsoft YaHei", sans-serif;
-  font-size: 11px;
+  font-size: 13.2px;
   font-weight: 400;
-  letter-spacing: 0.045em;
-  line-height: 12px;
+  letter-spacing: 0;
+  line-height: 15px;
   white-space: nowrap;
 }
 
@@ -977,8 +1009,9 @@ textarea:focus-visible {
   position: absolute;
   top: 7px;
   right: 10px;
-  color: #999997;
-  font-size: 14px;
+  color: rgba(214, 214, 214, 0.5);
+  font-size: 15.4px;
+  font-weight: 400;
   line-height: 1.1;
   white-space: nowrap;
 }
@@ -1028,13 +1061,13 @@ textarea:focus-visible {
 }
 
 .skill-card-chevron span::before {
-  left: 1.5px;
-  transform: rotate(-42.5deg);
+  left: 1.25px;
+  transform: rotate(-37.5deg);
 }
 
 .skill-card-chevron span::after {
-  left: 6px;
-  transform: rotate(42.5deg);
+  left: 5.75px;
+  transform: rotate(37.5deg);
 }
 
 .skill-card-chevron span:first-child {
@@ -1060,43 +1093,94 @@ textarea:focus-visible {
   align-items: center;
   gap: 9px;
   padding: 7px 11px 0;
-  color: #c8c8c6;
-  font-size: 12px;
-  font-weight: 600;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 15.6px;
+  font-weight: 400;
+}
+
+.skill-card-subtitle--header {
+  gap: 7px;
+  padding: 0;
+  margin-top: 15px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.node-rank-decoration {
+  position: absolute;
+  z-index: 2;
+  top: 21px;
+  left: 0;
+  display: block;
+  width: 50.6px;
+  height: 12px;
+  pointer-events: none;
+}
+
+.node-decoration-ring {
+  position: absolute;
+  z-index: 2;
+  top: 3px;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  box-sizing: border-box;
+  border: 1.5px solid rgba(255, 255, 255, 0.21);
+  border-radius: 50%;
+  background: transparent;
+}
+
+.node-decoration-track {
+  position: absolute;
+  top: 3px;
+  left: 7px;
+  width: 43.6px;
+  height: 6px;
+  overflow: hidden;
+}
+
+.node-decoration-track img {
+  position: absolute;
+  top: 0;
+  left: -19px;
+  display: block;
+  width: 75px;
+  height: 6px;
+  object-fit: contain;
+  object-position: left center;
+  opacity: 0.42;
+}
+
+.node-decoration-track .rank-decoration-cracks {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
 }
 
 .node-marks {
   display: inline-flex;
-  gap: 4px;
+  align-items: center;
+  gap: 3px;
+  height: 13px;
 }
 
 .node-marks i {
-  position: relative;
   display: block;
-  width: 9px;
-  height: 5px;
-  transform: skew(-31deg);
+  width: 4.5px;
+  height: 12px;
+  border-radius: 2px;
   background: #f0f0ea;
-}
-
-.node-marks i::after {
-  position: absolute;
-  top: 0;
-  right: -4px;
-  width: 5px;
-  height: 5px;
-  content: "";
-  background: #f0f0ea;
-  clip-path: polygon(0 0, 100% 0, 63% 100%, 0 100%);
+  transform: rotate(45deg);
 }
 
 .skill-card-body {
-  padding: 8px 11px 11px;
-  color: #c8c8c6;
+  padding: 8px 11px 15px;
+  color: #d6d6d6;
   font-family: "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.3;
+  font-size: 15.6px;
+  font-weight: 400;
+  line-height: 1.25;
   letter-spacing: 0;
   white-space: normal;
   overflow-wrap: anywhere;
@@ -1107,9 +1191,16 @@ textarea:focus-visible {
   padding-top: 8px;
 }
 
+.skill-card--talent .skill-card-body {
+  padding-top: 6px;
+  padding-bottom: 15px;
+  font-size: 15.6px;
+  line-height: 1.25;
+}
+
 .rich-token {
   display: inline;
-  color: #c8c8c6;
+  color: #d6d6d6;
 }
 
 .rich-token-damage {
@@ -1122,11 +1213,11 @@ textarea:focus-visible {
 }
 
 .rich-token-healing {
-  color: #ade131;
+  color: #b4d945;
 }
 
 .rich-token-number {
-  color: #ffd399;
+  color: #9eb7ff;
 }
 
 .rich-token-link {
@@ -1141,18 +1232,19 @@ textarea:focus-visible {
   display: inline-block;
   width: 1em;
   height: 1em;
-  margin-right: 2px;
+  margin-right: 0.5px;
   vertical-align: -0.16em;
   object-fit: contain;
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.22));
 }
 
 .rich-token-icon-only {
-  margin-right: 2px;
+  margin-right: 0.5px;
 }
 
 .skill-card-footer {
   margin: 0 9px;
+  padding-bottom: 4px;
 }
 
 .skill-card-footer-row {
@@ -1161,8 +1253,9 @@ textarea:focus-visible {
   justify-content: space-between;
   gap: 16px;
   min-height: 31px;
-  color: #c7c8c5;
-  font-size: 15px;
+  color: #d6d6d6;
+  font-size: 18px;
+  font-weight: 400;
   line-height: 1.15;
 }
 
@@ -1171,9 +1264,14 @@ textarea:focus-visible {
 }
 
 .skill-card-footer-row strong {
-  color: #d4d5d0;
-  font-size: 14px;
+  color: #d6d6d6;
+  font-family: "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
+  font-size: 18px;
   font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  line-height: 1.15;
+  -webkit-text-stroke: 0;
 }
 
 .notice {
@@ -1237,13 +1335,13 @@ textarea:focus-visible {
   }
 
   .preview-grid {
-    grid-template-columns: minmax(378px, 1fr);
+    grid-template-columns: minmax(400px, 1fr);
     justify-items: center;
   }
 
   .preview-heading,
   .preview-meta-row {
-    max-width: 378px;
+    max-width: 400px;
   }
 }
 
@@ -1310,7 +1408,7 @@ textarea:focus-visible {
 
   .preview-card-shell {
     display: none;
-    width: 378px;
+    width: 400px;
     max-width: 100%;
     margin: 0 auto;
   }
@@ -1414,11 +1512,4 @@ textarea:focus-visible {
     width: 100%;
   }
 
-  .skill-card-title {
-    font-size: 16px;
-  }
-
-  .skill-card-body {
-    font-size: 13px;
-  }
 }

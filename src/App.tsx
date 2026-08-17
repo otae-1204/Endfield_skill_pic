@@ -4,7 +4,7 @@ import { SkillCardView } from "./components/SkillCard";
 import { DEFAULT_PACK, SLOT_LABELS } from "./data/defaultPack";
 import { exportElementAsPng, filenameForCard } from "./lib/exportPng";
 import {
-  applyManualStyle,
+  applyManualPreset,
   parseRichText,
   tokensToText,
 } from "./lib/richText";
@@ -19,7 +19,7 @@ import {
   savePack,
   validatePack,
 } from "./lib/storage";
-import type { EditableCardPatch, SkillCard, SkillPack, SkillSlot, TokenStyle } from "./types";
+import type { EditableCardPatch, ManualStyleId, SkillCard, SkillPack, SkillSlot } from "./types";
 import "./styles.css";
 
 type Notice = {
@@ -87,12 +87,12 @@ export default function App() {
   }, []);
 
   const updateBodyStyle = useCallback(
-    (slot: SkillSlot, start: number, end: number, style: TokenStyle) => {
+    (slot: SkillSlot, start: number, end: number, style: ManualStyleId) => {
       setPack((current) => ({
         ...current,
         cards: current.cards.map((card) =>
           card.slot === slot
-            ? { ...card, body: applyManualStyle(card.body, start, end, style) }
+            ? { ...card, body: applyManualPreset(card.body, start, end, style) }
             : card,
         ) as SkillPack["cards"],
       }));
@@ -105,6 +105,17 @@ export default function App() {
   }, []);
 
   useDraftPersistence(pack, handleSaved);
+
+  useEffect(() => {
+    // Vite preserves component state across hot updates; migrate an already
+    // open older-width draft immediately when the card base width changes.
+    if (Number(pack.render.baseWidth) !== 400) {
+      setPack((current) => ({
+        ...current,
+        render: { ...current.render, baseWidth: 400 },
+      }));
+    }
+  }, [pack.render.baseWidth]);
 
   useEffect(() => {
     if (lastSavedAt) {

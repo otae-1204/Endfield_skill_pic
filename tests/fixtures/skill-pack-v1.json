@@ -8,6 +8,5 @@
     { "slot": "talentA", "title": "导入五", "typeLabel": "天赋", "body": "恢复生命值" },
     { "slot": "talentB", "title": "导入六", "typeLabel": "天赋", "body": "增加9%效果" }
   ],
-  "render": { "baseWidth": 378, "scale": 2, "transparentCorners": true }
+  "render": { "baseWidth": 400, "scale": 2, "transparentCorners": true }
 }
-

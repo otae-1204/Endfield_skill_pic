@@ -1,12 +1,19 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyManualPreset,
   applyManualStyle,
   parseRichText,
+  TOKEN_COLORS,
   tokenClass,
   tokensToText,
+  updateRichTextPreservingManual,
 } from "./richText";
 
 describe("rich text rules", () => {
+  it("uses the tooltip panel's light-gray base text color", () => {
+    expect(TOKEN_COLORS.plain).toBe("#D6D6D6");
+  });
+
   it("uses longest matching semantic words before numbers", () => {
     const tokens = parseRichText("造成18%电磁伤害，并恢复生命值");
 
@@ -18,7 +25,7 @@ describe("rich text rules", () => {
       { text: "恢复生命", style: "healing" },
       { text: "值", style: "plain" },
     ]);
-    expect(tokens[2]).toMatchObject({ richTextId: "ba.pulse", color: "#ffcc00" });
+    expect(tokens[2]).toMatchObject({ richTextId: "ba.pulse", color: "#FFCC00" });
   });
 
   it("recognizes untagged vulnerability, infliction, and amp annotations", () => {
@@ -32,7 +39,8 @@ describe("rich text rules", () => {
     expect(tokens.find((token) => token.text === "法术附着")).toMatchObject({
       style: "state",
       richTextId: "ba.spellinflict",
-      color: "#33c2ff",
+      color: "#33C2FF",
+      underline: true,
     });
     expect(tokens.find((token) => token.text === "增幅")).toMatchObject({
       style: "state",
@@ -48,6 +56,81 @@ describe("rich text rules", () => {
       style: "healing",
       richTextId: "ba.naturalenhance",
       iconSrc: "/assets/richtext/66503e96323cfcf6.png",
+    });
+  });
+
+  it("underlines automatically recognized spell infliction and spell status", () => {
+    const tokens = parseRichText("法术附着会形成法术异常");
+
+    expect(tokens.find((token) => token.text === "法术附着")).toMatchObject({
+      underline: true,
+      source: "auto",
+    });
+    expect(tokens.find((token) => token.text === "法术异常")).toMatchObject({
+      underline: true,
+      source: "auto",
+    });
+  });
+
+  it("inherits spell-category underlines for infliction and status subclasses", () => {
+    const subclassNames = [
+      "灼热附着",
+      "电磁附着",
+      "寒冷附着",
+      "自然附着",
+      "燃烧",
+      "导电",
+      "冻结",
+      "腐蚀",
+    ];
+    const tokens = parseRichText(subclassNames.join("、"));
+
+    for (const name of subclassNames) {
+      expect(tokens.find((token) => token.text === name)).toMatchObject({
+        underline: true,
+        source: "auto",
+      });
+    }
+  });
+
+  it("recognizes corrosion with its natural color and term icon", () => {
+    const [corrosion] = parseRichText("腐蚀");
+
+    expect(corrosion).toMatchObject({
+      text: "腐蚀",
+      style: "healing",
+      richTextId: "ba.corrupt",
+      color: "#B4D945",
+      iconSrc: "/assets/richtext/f9179317c2ae317f.png",
+      iconScale: 1.4,
+    });
+  });
+
+  it("recognizes slow with its game term icon and underline", () => {
+    const [slow] = parseRichText("缓速");
+
+    expect(slow).toMatchObject({
+      text: "缓速",
+      style: "link",
+      richTextId: "ba.slow",
+      color: "#33C2FF",
+      iconSrc: "/assets/richtext/441badac71ceee4e.png",
+      iconScale: 1.4,
+      underline: true,
+      source: "auto",
+    });
+  });
+
+  it("compensates attachment icons with different transparent padding", () => {
+    const tokens = parseRichText("寒冷附着、自然附着");
+
+    expect(tokens.find((token) => token.text === "寒冷附着")).toMatchObject({
+      richTextId: "ba.crystinflict",
+      iconScale: 1.4,
+    });
+    expect(tokens.find((token) => token.text === "自然附着")).toMatchObject({
+      richTextId: "ba.naturalinflict",
+      iconScale: 1.5,
     });
   });
 
@@ -68,6 +151,56 @@ describe("rich text rules", () => {
     expect(tokenClass("state")).toBe("rich-token rich-token-state");
   });
 
+  it("applies exact manual color presets instead of broad semantic colors", () => {
+    const styled = applyManualPreset(parseRichText("伤害降低效果"), 2, 4, "ba.vdown");
+
+    expect(styled.find((token) => token.text === "降低")).toMatchObject({
+      style: "number",
+      manual: true,
+      manualStyleId: "ba.vdown",
+      color: "#FF8080",
+      source: "manual",
+    });
+  });
+
+  it("applies an underline without changing the existing text color", () => {
+    const styled = applyManualPreset(
+      parseRichText("需要<@ba.fire>灼热</>效果"),
+      2,
+      4,
+      "underline",
+    );
+
+    expect(styled.find((token) => token.text === "灼热")).toMatchObject({
+      style: "damage",
+      manualStyleId: "underline",
+      color: "#FF8E59",
+      underline: true,
+    });
+  });
+
+  it("preserves manual annotations when text outside them is edited", () => {
+    const manuallyStyled = applyManualPreset(parseRichText("前缀重点后缀"), 2, 4, "ba.vdown");
+    const edited = updateRichTextPreservingManual(manuallyStyled, "新增前缀重点后缀");
+
+    expect(edited.find((token) => token.text === "重点")).toMatchObject({
+      manual: true,
+      manualStyleId: "ba.vdown",
+      color: "#FF8080",
+    });
+  });
+
+  it("lets replacement text inside a manual annotation inherit its style", () => {
+    const manuallyStyled = applyManualPreset(parseRichText("前缀重点后缀"), 2, 4, "bold");
+    const edited = updateRichTextPreservingManual(manuallyStyled, "前缀核心内容后缀");
+
+    expect(edited.find((token) => token.text === "核心内容")).toMatchObject({
+      manual: true,
+      manualStyleId: "bold",
+      bold: true,
+    });
+  });
+
   it("parses API tags and image tags without dropping the visible text", () => {
     const tokens = parseRichText(
       '<#ba.pulseinflict>电磁附着</> + <@ba.pulse>电磁伤害</><image="https://assets.fz.wiki/c40f3979bc72cf80/c660f77745ae564b.png" scale=1.25/>',
@@ -79,11 +212,13 @@ describe("rich text rules", () => {
       richTextId: "ba.pulseinflict",
       tagKind: "#",
       iconSrc: "/assets/richtext/c660f77745ae564b.png",
+      iconScale: 1.4,
       underline: true,
     });
     expect(tokens.at(-1)).toMatchObject({
       source: "image",
       iconSrc: "/assets/richtext/c660f77745ae564b.png",
+      iconScale: 1.25,
     });
   });
 
@@ -96,5 +231,43 @@ describe("rich text rules", () => {
       underline: true,
     });
     expect(consume?.color).toBeUndefined();
+  });
+
+  it("uses the documented skill-panel preDef[0] palette", () => {
+    const tokens = parseRichText(
+      "<@bl.key>关键</><@ba.vup>提升</><@ba.vdown>降低</><@ba.heal>治疗</><@ba.cryst>寒冷</><@ba.ether>以太</><@ba.info>说明</>",
+    );
+
+    expect(tokens.map(({ text, color }) => ({ text, color }))).toEqual([
+      { text: "关键", color: "#FFBB03" },
+      { text: "提升", color: "#9EB7FF" },
+      { text: "降低", color: "#FF8080" },
+      { text: "治疗", color: "#B4D945" },
+      { text: "寒冷", color: "#30D6E0" },
+      { text: "以太", color: "#C59EFF" },
+      { text: "说明", color: "#999999" },
+    ]);
+  });
+
+  it("keeps unknown tags at the white body-text fallback", () => {
+    const [direct, separator, term] = parseRichText(
+      "<@missing.style>直接样式</>|<#missing.term>未知术语</>",
+    );
+
+    expect(direct).toMatchObject({ text: "直接样式", style: "plain" });
+    expect(direct.color).toBeUndefined();
+    expect(separator).toMatchObject({ text: "|", style: "plain" });
+    expect(term).toMatchObject({ text: "未知术语", style: "plain" });
+    expect(term.color).toBeUndefined();
+  });
+
+  it("uses weight 700 metadata only for explicit bold tags", () => {
+    const tokens = parseRichText("普通<b>粗体</b><@intru.bold>强调</>");
+
+    expect(tokens.map(({ text, bold }) => ({ text, bold }))).toEqual([
+      { text: "普通", bold: undefined },
+      { text: "粗体", bold: true },
+      { text: "强调", bold: true },
+    ]);
   });
 });

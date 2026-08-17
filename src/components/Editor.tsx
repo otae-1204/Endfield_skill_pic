@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
-import type { SkillCard, SkillSlot, TokenStyle } from "../types";
+import type { ManualStyleId, SkillCard, SkillSlot } from "../types";
 import {
-  parseRichText,
-  TOKEN_COLORS,
-  TOKEN_LABELS,
+  MANUAL_STYLE_OPTIONS,
+  MANUAL_STYLE_PRESETS,
   tokensToEditorText,
+  updateRichTextPreservingManual,
 } from "../lib/richText";
 import { SLOT_IDS } from "../types";
 
@@ -13,19 +13,17 @@ type EditorProps = {
   activeSlot: SkillSlot;
   onSelect: (slot: SkillSlot) => void;
   onUpdate: (slot: SkillSlot, patch: Partial<SkillCard>) => void;
-  onApplyStyle: (slot: SkillSlot, start: number, end: number, style: TokenStyle) => void;
+  onApplyStyle: (slot: SkillSlot, start: number, end: number, style: ManualStyleId) => void;
 };
-
-const styleOptions: TokenStyle[] = ["damage", "state", "healing", "number", "link", "plain"];
 
 function StyleToolbar({
   textareaRef,
   onApply,
 }: {
   textareaRef: RefObject<HTMLTextAreaElement>;
-  onApply: (style: TokenStyle, start: number, end: number) => void;
+  onApply: (style: ManualStyleId, start: number, end: number) => void;
 }) {
-  const apply = (style: TokenStyle) => {
+  const apply = (style: ManualStyleId) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
     onApply(style, textarea.selectionStart, textarea.selectionEnd);
@@ -35,19 +33,22 @@ function StyleToolbar({
   return (
     <div className="style-toolbar" aria-label="富文本工具栏">
       <span className="toolbar-label">标注</span>
-      {styleOptions.map((style) => (
-        <button
-          key={style}
-          type="button"
-          className={`style-tool style-tool-${style}`}
-          onMouseDown={(event) => event.preventDefault()}
-          onClick={() => apply(style)}
-          title={`将选中文字标记为${TOKEN_LABELS[style]}`}
-        >
-          <i style={{ backgroundColor: TOKEN_COLORS[style] }} />
-          {TOKEN_LABELS[style]}
-        </button>
-      ))}
+      {MANUAL_STYLE_OPTIONS.map((style) => {
+        const preset = MANUAL_STYLE_PRESETS[style];
+        return (
+          <button
+            key={style}
+            type="button"
+            className={`style-tool style-tool-${style}`}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={() => apply(style)}
+            title={`将选中文字标记为${preset.label}`}
+          >
+            <i style={{ backgroundColor: preset.color }} />
+            {preset.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -256,7 +257,7 @@ export function EditorPanel({ cards, activeSlot, onSelect, onUpdate, onApplyStyl
             onChange={(event) => {
               setBodyDraft(event.target.value);
               onUpdate(card.slot, {
-                body: parseRichText(event.target.value),
+                body: updateRichTextPreservingManual(card.body, event.target.value),
               });
             }}
             spellCheck={false}

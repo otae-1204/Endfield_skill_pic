@@ -6,7 +6,15 @@ import {
   type SkillPack,
   type RichToken,
 } from "../types";
-import { applyManualStyle, isTokenStyle, parseRichText, tokensToText } from "./richText";
+import {
+  applyManualStyle,
+  applyManualPreset,
+  isManualStyleId,
+  isTokenStyle,
+  parseRichText,
+  tokensToEditorText,
+  tokensToText,
+} from "./richText";
 
 export const STORAGE_KEY = "skill-card-forge:pack:v1";
 
@@ -24,6 +32,7 @@ function normalizeToken(value: Record<string, unknown>): RichToken {
     style: isTokenStyle(value.style) ? value.style : "plain",
   };
   if (value.manual === true) token.manual = true;
+  if (isManualStyleId(value.manualStyleId)) token.manualStyleId = value.manualStyleId;
   if (typeof value.richTextId === "string") token.richTextId = value.richTextId;
   if (isTagKind(value.tagKind)) token.tagKind = value.tagKind;
   if (typeof value.iconSrc === "string") token.iconSrc = value.iconSrc;
@@ -54,17 +63,16 @@ function normalizeConsumeToken(token: RichToken): RichToken {
 }
 
 function upgradeLegacyTokens(tokens: RichToken[]): RichToken[] {
-  const hasRichMetadata = tokens.some(
-    (token) => token.richTextId || token.color || token.iconSrc || token.source,
-  );
-  if (hasRichMetadata) return tokens.map(normalizeConsumeToken);
-
-  let upgraded = parseRichText(tokensToText(tokens));
+  // Reparse every stored token array so old serialized colors and unknown-tag
+  // fallbacks cannot override the current skill-panel palette.
+  let upgraded = parseRichText(tokensToEditorText(tokens));
   let offset = 0;
   for (const token of tokens) {
     const nextOffset = offset + token.text.length;
     if (token.manual) {
-      upgraded = applyManualStyle(upgraded, offset, nextOffset, token.style);
+      upgraded = token.manualStyleId
+        ? applyManualPreset(upgraded, offset, nextOffset, token.manualStyleId)
+        : applyManualStyle(upgraded, offset, nextOffset, token.style);
     }
     offset = nextOffset;
   }
@@ -115,7 +123,7 @@ export function normalizePack(value: unknown): SkillPack {
     version: 1,
     cards: cards as SkillPack["cards"],
     render: {
-      baseWidth: 378,
+      baseWidth: 400,
       scale: renderValue.scale === 2 ? 2 : 1,
       transparentCorners: true,
     },
