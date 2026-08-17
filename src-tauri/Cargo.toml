@@ -1,0 +1,17 @@
+[package]
+name = "skill-card-forge"
+version = "0.1.0"
+description = "离线六卡技能展示生成器"
+authors = ["Skill Card Forge"]
+edition = "2021"
+
+[lib]
+name = "skill_card_forge_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.0", features = [] }
+
+[dependencies]
+tauri = { version = "2.0", features = [] }
+
