@@ -31,7 +31,18 @@ function SkillMastery({ rank }: { rank: number }) {
     <span className={`skill-mastery mastery-${mastery}`} aria-label={label}>
       <svg viewBox="130 170 560 560" aria-hidden="true">
         {MASTERY_UNIT_POINTS.map(([className, points]) => (
-          <polygon key={className} className={`mastery-unit ${className}`} points={points} />
+          <polygon
+            key={className}
+            className={`mastery-unit ${className}`}
+            points={points}
+            fill={
+              mastery === 3 ||
+              (className === "mastery-left" && mastery >= 1) ||
+              (className === "mastery-bottom" && mastery >= 2)
+                ? "#ffffff"
+                : "#434241"
+            }
+          />
         ))}
       </svg>
     </span>
@@ -102,6 +113,18 @@ function RichBody({ tokens }: { tokens: RichToken[] }) {
         ));
       })}
     </div>
+  );
+}
+
+function FooterValue({ value }: { value: string }) {
+  const match = value.match(/^([\d.,+%\-]+)(.*)$/u);
+  if (!match) return <strong>{value}</strong>;
+
+  return (
+    <strong>
+      <span className="skill-card-footer-number">{match[1]}</span>
+      {match[2] ? <span className="skill-card-footer-unit">{match[2]}</span> : null}
+    </strong>
   );
 }
 
@@ -220,7 +243,7 @@ export const SkillCardView = forwardRef<HTMLDivElement, SkillCardProps>(
             {card.footerRows.map((row, index) => (
               <div className="skill-card-footer-row" key={`${row.label}-${index}`}>
                 <span>{row.label}</span>
-                <strong>{row.value}</strong>
+                <FooterValue value={row.value} />
               </div>
             ))}
           </div>

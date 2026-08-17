@@ -1,10 +1,17 @@
-# 六卡技能展示生成器
+# 《明日方舟：终末地》游戏内技能简览页面还原器
 
-一个离线运行的 React + TypeScript + Vite 技能卡生成器。它把六个固定槽位的结构化数据渲染成和预览一致的深色技能卡，并支持本地草稿、`SkillPack v1` JSON 和独立透明 PNG 导出。
+本项目的目的，是尽可能一比一复刻《明日方舟：终末地》游戏内的技能简览页面，并提供可编辑、可复用的还原器。它不是通用卡片生成器，也不是官方项目；当前重点是还原游戏中技能悬浮简览的字体、颜色、排版、图标、节点装饰、背景和底部属性区域。
 
-界面与技能卡正文使用《明日方舟：终末地》UI 同款的 HarmonyOS Sans SC。项目内嵌未修改的 Regular、Medium、Bold 字重；字体版权归 Huawei Device Co., Ltd. 所有，完整许可见 [`public/assets/fonts/LICENSE-HarmonyOS-Sans.txt`](public/assets/fonts/LICENSE-HarmonyOS-Sans.txt)。
+应用使用 React + TypeScript + Vite 离线运行，把普通攻击、战技、连携技、终结技和两个天赋节点的结构化数据渲染为技能简览卡片，并支持本地草稿、`SkillPack v1` JSON 和独立透明 PNG 导出。
 
-技能卡字体参数按 `skill_text_font_rendering.md` 以约 `0.6` Canvas 比例复刻：标题 `18px`、类型 `15.4px`、Rank `14.4px`、正文/节点 `15.6px`、底部属性 `18px`。由于 HarmonyOS Sans SC Regular 比游戏 `defaultfont_cn.ttf` 视觉更粗，常规 `400` 映射到 Light 字形并增加 `0.12px` 轻描边作视觉补偿；仅 `<b>` 与 `<@intru.bold>` 使用 Bold `700`。
+## 字体与数字渲染
+
+- 正文使用 `HarmonyOS Sans SC Regular`，当前字号为 `14.8px`、行高为 `1.22`、颜色为 `#D6D6D6`，不附加文字描边。HarmonyOS Sans SC 的许可见 [`public/assets/fonts/LICENSE-HarmonyOS-Sans.txt`](public/assets/fonts/LICENSE-HarmonyOS-Sans.txt)。
+- 标题、Rank、类型和部分中文 UI 优先使用从游戏资源提取的 `defaultfont_cn.ttf`。该文件在浏览器内注册为 `Endfield Default CN`。
+- 底部右侧数值不能把数字与中文单位作为同一种字体渲染。组件会把 `15秒` 拆成数字 `15` 与单位 `秒`：数字使用 `Novecento Sans Wide Normal`，字号 `21.5px`；中文单位使用 HarmonyOS Sans SC Regular，字号 `18px`。
+- Novecento 数字保持字体的普通数字形式：`font-variant-numeric: normal`、`font-feature-settings: normal`。不要启用 `tabular-nums`/`tnum`，否则数字 `1` 会切换为不符合参考图的字形。
+- 右侧数值整体上移 `1px`，右边距为 `9px`；纯数字（如 `240`）和带单位数值（如 `15秒`）共用这一定位规则。
+- `defaultfont_cn.ttf` 与 Novecento Webfont 都不随公开仓库分发。请把合法取得的字体分别放到 `public/assets/fonts/defaultfont_cn.ttf`、`public/assets/fonts/NovecentoSansWideNormal.woff2`（可同时提供 `.woff`）。缺少字体时浏览器会使用后备字体，视觉无法与参考图一致。
 
 ## 本地网页预览
 
@@ -27,7 +34,7 @@ npm run preview
 - 六个槽位固定为普通攻击、战技、连携技、终结技、天赋节点 A、天赋节点 B；每张卡的标题和右上角类型都可以改。
 - 正文通过关键词规则自动着色，也可以在工具栏中选中文本后使用 18 种精确预设手动标注，包括重要黄、关键词黄/蓝、战斗蓝、增益、减益、治疗、自然、灼热、寒冷、电磁、物理、以太、说明、下划线、链接、粗体和正文。手动标注会优先保留在当前文本中。
 - 颜色按 `skill_text_color_rendering.md` 的悬浮技能面板 `preDef[0]` 渲染：正文浅灰 `#D6D6D6`、电磁黄 `#FFCC00`、战斗蓝 `#33C2FF`、增益蓝紫 `#9EB7FF`、治疗/自然绿 `#B4D945`；未知标签保持当前正文色。纯白 `#FFFFFF` 仅用于角色页面展开后的大详情面板正文。
-- 卡片固定基准宽度 400px，内容自动增高；输出倍率为 1× 或 2×，四角保持透明圆角。
+- PNG 输出基准宽度固定为 360px，卡片内容自动增高；输出倍率为 1× 或 2×，四角保持透明圆角。
 - PNG 采用渲染预览共用的 DOM，等待本地字体加载后再生成；导出异常会提示错误且不会清空草稿。
 
 ## Tauri 2 桌面与 Android
@@ -63,7 +70,7 @@ Tauri 的 Android 构建需要 Android SDK、NDK、Java 和 Rust Android targets
       "body": [{ "text": "电磁伤害", "style": "damage" }]
     }
   ],
-  "render": { "baseWidth": 400, "scale": 2, "transparentCorners": true }
+  "render": { "baseWidth": 360, "scale": 2, "transparentCorners": true }
 }
 ```
 

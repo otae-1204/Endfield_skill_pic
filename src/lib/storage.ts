@@ -123,7 +123,7 @@ export function normalizePack(value: unknown): SkillPack {
     version: 1,
     cards: cards as SkillPack["cards"],
     render: {
-      baseWidth: 400,
+      baseWidth: 360,
       scale: renderValue.scale === 2 ? 2 : 1,
       transparentCorners: true,
     },

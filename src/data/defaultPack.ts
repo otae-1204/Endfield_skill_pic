@@ -63,7 +63,7 @@ export const DEFAULT_PACK: SkillPack = {
     body: parseRichText(body),
   })) as SkillPack["cards"],
   render: {
-    baseWidth: 400,
+    baseWidth: 360,
     scale: 1,
     transparentCorners: true,
   },

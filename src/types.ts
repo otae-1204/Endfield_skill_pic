@@ -73,7 +73,7 @@ export type SkillCard = {
 };
 
 export type RenderSettings = {
-  baseWidth: 400;
+  baseWidth: 360;
   scale: 1 | 2;
   transparentCorners: true;
 };

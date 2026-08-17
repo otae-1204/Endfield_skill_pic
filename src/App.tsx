@@ -109,10 +109,10 @@ export default function App() {
   useEffect(() => {
     // Vite preserves component state across hot updates; migrate an already
     // open older-width draft immediately when the card base width changes.
-    if (Number(pack.render.baseWidth) !== 400) {
+    if (Number(pack.render.baseWidth) !== 360) {
       setPack((current) => ({
         ...current,
-        render: { ...current.render, baseWidth: 400 },
+        render: { ...current.render, baseWidth: 360 },
       }));
     }
   }, [pack.render.baseWidth]);

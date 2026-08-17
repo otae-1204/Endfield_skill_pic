@@ -31,7 +31,7 @@ describe("SkillPack v1", () => {
     const parsed = JSON.parse(json) as typeof DEFAULT_PACK;
     expect(parsed.version).toBe(1);
     expect(parsed.cards).toHaveLength(6);
-    expect(parsed.render.baseWidth).toBe(400);
+    expect(parsed.render.baseWidth).toBe(360);
   });
 
   it("migrates legacy token arrays so new API icons appear in old drafts", () => {

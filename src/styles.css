@@ -30,6 +30,32 @@
   font-display: block;
 }
 
+/**
+ * @license
+ * Webfont: Novecento Sans Wide Normal by Synthview
+ * URL: https://www.myfonts.com/collections/synthview-foundry
+ * The font is used under the website owner's MyFonts Webfont EULA.
+ * Other parties must obtain their own valid license.
+ * © 2026 MyFonts Inc.
+ */
+@font-face {
+  font-family: "NovecentoSansWideNormal";
+  src:
+    url("/assets/fonts/NovecentoSansWideNormal.woff2") format("woff2"),
+    url("/assets/fonts/NovecentoSansWideNormal.woff") format("woff");
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Endfield Default CN";
+  src: url("/assets/fonts/defaultfont_cn.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+}
+
 :root {
   color: #e8e9e7;
   background: #0d1114;
@@ -665,7 +691,7 @@ textarea:focus-visible {
 
 .preview-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(400px, 1fr));
+  grid-template-columns: repeat(2, minmax(252px, 1fr));
   gap: 40px 26px;
   align-items: start;
   max-width: 1140px;
@@ -674,6 +700,7 @@ textarea:focus-visible {
 
 .preview-card-shell {
   position: relative;
+  width: 252px;
   min-width: 0;
   padding-top: 17px;
 }
@@ -687,7 +714,8 @@ textarea:focus-visible {
 }
 
 .preview-card-shell .skill-card {
-  max-width: 100%;
+  max-width: none;
+  zoom: 0.63;
 }
 
 .preview-card-shell.is-active .preview-card-index {
@@ -715,37 +743,42 @@ textarea:focus-visible {
   left: -20000px;
   display: grid;
   gap: 20px;
-  width: 400px;
+  width: 360px;
   pointer-events: none;
 }
 
 .export-stage-card {
-  width: 400px;
+  width: 360px;
 }
 
-/* The rendered card uses the same 400px base width in preview and export. */
+/* The card is authored at 400px and uniformly reduced for the 360px PNG target. */
 .skill-card {
   position: relative;
   width: 400px;
   min-height: 100px;
   overflow: hidden;
-  border: 1px solid rgba(195, 197, 190, 0.38);
+  border: 1px solid transparent;
   border-radius: 6px;
-  background:
-    radial-gradient(circle at 88% 4%, rgba(116, 116, 112, 0.1), transparent 31%),
-    linear-gradient(135deg, rgba(60, 60, 58, 0.97), rgba(29, 29, 28, 0.985) 68%, rgba(24, 24, 23, 0.99));
+  background: radial-gradient(
+    145% 105% at 12% 0%,
+    rgb(54, 54, 54) 0%,
+    rgb(44, 44, 44) 52%,
+    rgb(34, 34, 34) 100%
+  );
   box-shadow:
-    0 13px 30px rgba(0, 0, 0, 0.23),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+    0 12px 28px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.28);
   color: #d6d6d6;
   cursor: pointer;
+  font-family: "Endfield Default CN", sans-serif;
   font-style: normal;
   font-weight: 400;
   font-kerning: normal;
   letter-spacing: 0;
+  text-rendering: auto;
   word-spacing: 0;
-  -webkit-text-stroke: 0.12px currentColor;
+  -webkit-text-stroke: 0;
   isolation: isolate;
 }
 
@@ -755,37 +788,30 @@ textarea:focus-visible {
   inset: 0;
   pointer-events: none;
   content: "";
-  opacity: 0.1;
-  background: repeating-linear-gradient(
-    135deg,
-    transparent 0,
-    transparent 4px,
-    rgba(255, 255, 255, 0.13) 5px,
-    transparent 6px
-  );
-  mix-blend-mode: overlay;
+  background: none;
 }
 
 .skill-card:hover,
 .skill-card.is-selected {
-  border-color: rgba(217, 255, 74, 0.72);
+  border-color: transparent;
   box-shadow:
-    0 13px 32px rgba(0, 0, 0, 0.28),
-    0 0 0 1px rgba(217, 255, 74, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    0 12px 28px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.28);
 }
 
 .export-stage .skill-card {
   cursor: default;
+  zoom: 0.9;
 }
 
 .export-stage .skill-card:hover,
 .export-stage .skill-card.is-selected {
-  border-color: rgba(195, 197, 190, 0.38);
+  border-color: transparent;
   box-shadow:
-    0 13px 30px rgba(0, 0, 0, 0.23),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+    0 12px 28px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.28);
 }
 
 .card-signal {
@@ -835,8 +861,8 @@ textarea:focus-visible {
 .skill-card-title {
   overflow: hidden;
   color: #d6d6d6;
-  font-family: "HarmonyOS Sans SC Regular", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
-  font-size: 18px;
+  font-family: "Endfield Default CN", sans-serif;
+  font-size: 17px;
   font-weight: 400;
   letter-spacing: 0;
   line-height: 1.15;
@@ -851,7 +877,7 @@ textarea:focus-visible {
 }
 
 .skill-card--talent .skill-card-title {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 400;
   line-height: 1.12;
 }
@@ -997,8 +1023,8 @@ textarea:focus-visible {
   left: 27px;
   display: inline-block;
   color: rgba(255, 255, 255, 0.6);
-  font-family: "HarmonyOS Sans SC", Arial, "Microsoft YaHei", sans-serif;
-  font-size: 13.2px;
+  font-family: "Endfield Default CN", sans-serif;
+  font-size: 12.4px;
   font-weight: 400;
   letter-spacing: 0;
   line-height: 15px;
@@ -1010,7 +1036,7 @@ textarea:focus-visible {
   top: 7px;
   right: 10px;
   color: rgba(214, 214, 214, 0.5);
-  font-size: 15.4px;
+  font-size: 14.5px;
   font-weight: 400;
   line-height: 1.1;
   white-space: nowrap;
@@ -1071,11 +1097,11 @@ textarea:focus-visible {
 }
 
 .skill-card-chevron span:first-child {
-  top: 0;
+  top: 0.5px;
 }
 
 .skill-card-chevron span:last-child {
-  top: 7px;
+  top: 6.5px;
 }
 
 .skill-card-divider,
@@ -1094,7 +1120,7 @@ textarea:focus-visible {
   gap: 9px;
   padding: 7px 11px 0;
   color: rgba(255, 255, 255, 0.3);
-  font-size: 15.6px;
+  font-size: 15px;
   font-weight: 400;
 }
 
@@ -1102,7 +1128,7 @@ textarea:focus-visible {
   gap: 7px;
   padding: 0;
   margin-top: 15px;
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 400;
   line-height: 1.2;
 }
@@ -1177,10 +1203,10 @@ textarea:focus-visible {
 .skill-card-body {
   padding: 8px 11px 15px;
   color: #d6d6d6;
-  font-family: "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
-  font-size: 15.6px;
+  font-family: "HarmonyOS Sans SC Regular", "Endfield Default CN", sans-serif;
+  font-size: 14.8px;
   font-weight: 400;
-  line-height: 1.25;
+  line-height: 1.22;
   letter-spacing: 0;
   white-space: normal;
   overflow-wrap: anywhere;
@@ -1194,8 +1220,8 @@ textarea:focus-visible {
 .skill-card--talent .skill-card-body {
   padding-top: 6px;
   padding-bottom: 15px;
-  font-size: 15.6px;
-  line-height: 1.25;
+  font-size: 14.8px;
+  line-height: 1.22;
 }
 
 .rich-token {
@@ -1243,8 +1269,9 @@ textarea:focus-visible {
 }
 
 .skill-card-footer {
-  margin: 0 9px;
+  margin: 0 0 0 13px;
   padding-bottom: 4px;
+  -webkit-text-stroke: 0;
 }
 
 .skill-card-footer-row {
@@ -1254,9 +1281,12 @@ textarea:focus-visible {
   gap: 16px;
   min-height: 31px;
   color: #d6d6d6;
-  font-size: 18px;
+  font-family: "Endfield Default CN", sans-serif;
+  font-size: 16.5px;
   font-weight: 400;
-  line-height: 1.15;
+  letter-spacing: 0;
+  line-height: 1.18;
+  padding-right: 9px;
 }
 
 .skill-card-footer-row + .skill-card-footer-row {
@@ -1264,14 +1294,27 @@ textarea:focus-visible {
 }
 
 .skill-card-footer-row strong {
+  position: relative;
+  top: -1px;
   color: #d6d6d6;
-  font-family: "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
-  font-size: 18px;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
+  font-family: "Endfield Default CN", sans-serif;
+  font-size: inherit;
+  font-weight: 400;
+  font-variant-numeric: normal;
+  font-feature-settings: normal;
   letter-spacing: 0;
-  line-height: 1.15;
-  -webkit-text-stroke: 0;
+  line-height: inherit;
+  white-space: nowrap;
+}
+
+.skill-card-footer-number {
+  font-family: "NovecentoSansWideNormal", "Endfield Default CN", sans-serif;
+  font-size: 21.5px;
+}
+
+.skill-card-footer-unit {
+  font-family: "HarmonyOS Sans SC Regular", "Endfield Default CN", sans-serif;
+  font-size: 18px;
 }
 
 .notice {
@@ -1335,7 +1378,7 @@ textarea:focus-visible {
   }
 
   .preview-grid {
-    grid-template-columns: minmax(400px, 1fr);
+    grid-template-columns: minmax(252px, 1fr);
     justify-items: center;
   }
 
@@ -1408,7 +1451,7 @@ textarea:focus-visible {
 
   .preview-card-shell {
     display: none;
-    width: 400px;
+    width: 252px;
     max-width: 100%;
     margin: 0 auto;
   }
