@@ -6,6 +6,8 @@
 
 ## 字体与数字渲染
 
+字体选择、已知问题和排查顺序详见 [`docs/FONT_RENDERING.md`](docs/FONT_RENDERING.md)。
+
 - 正文使用 `HarmonyOS Sans SC Regular`，当前字号为 `14.8px`、行高为 `1.22`、颜色为 `#D6D6D6`，不附加文字描边。HarmonyOS Sans SC 的许可见 [`public/assets/fonts/LICENSE-HarmonyOS-Sans.txt`](public/assets/fonts/LICENSE-HarmonyOS-Sans.txt)。
 - 标题、Rank、类型和部分中文 UI 优先使用从游戏资源提取的 `defaultfont_cn.ttf`。该文件在浏览器内注册为 `Endfield Default CN`。
 - 底部右侧数值不能把数字与中文单位作为同一种字体渲染。组件会把 `15秒` 拆成数字 `15` 与单位 `秒`：数字使用 `Novecento Sans Wide Normal`，字号 `21.5px`；中文单位使用 HarmonyOS Sans SC Regular，字号 `18px`。
@@ -33,6 +35,7 @@ npm run preview
 
 - 六个槽位固定为普通攻击、战技、连携技、终结技、天赋节点 A、天赋节点 B；每张卡的标题和右上角类型都可以改。
 - 正文通过关键词规则自动着色，也可以在工具栏中选中文本后使用 18 种精确预设手动标注，包括重要黄、关键词黄/蓝、战斗蓝、增益、减益、治疗、自然、灼热、寒冷、电磁、物理、以太、说明、下划线、链接、粗体和正文。手动标注会优先保留在当前文本中。
+- 可以添加全局自定义关键词并选择上述任一样式。规则实时应用到六张卡片，较长关键词优先，自定义规则优先于内置自动识别，手动标注仍保持最高优先级；规则会随本地草稿和 JSON 一起保存。
 - 颜色按 `skill_text_color_rendering.md` 的悬浮技能面板 `preDef[0]` 渲染：正文浅灰 `#D6D6D6`、电磁黄 `#FFCC00`、战斗蓝 `#33C2FF`、增益蓝紫 `#9EB7FF`、治疗/自然绿 `#B4D945`；未知标签保持当前正文色。纯白 `#FFFFFF` 仅用于角色页面展开后的大详情面板正文。
 - PNG 输出基准宽度固定为 360px，卡片内容自动增高；输出倍率为 1× 或 2×，四角保持透明圆角。
 - PNG 采用渲染预览共用的 DOM，等待本地字体加载后再生成；导出异常会提示错误且不会清空草稿。
@@ -61,6 +64,9 @@ Tauri 的 Android 构建需要 Android SDK、NDK、Java 和 Rust Android targets
 ```json
 {
   "version": 1,
+  "customKeywords": [
+    { "id": "rule-1", "keyword": "雷暴领域", "style": "ba.pulse" }
+  ],
   "cards": [
     {
       "slot": "normalAttack",

@@ -36,6 +36,8 @@
   - 增幅、法术增幅
   - 电磁、灼热、寒冷、自然、物理对应的脆弱与增幅
 - 已补充 FZ Wiki API 对应的本地图标，离线运行时不依赖外部网站
+- 支持用户添加、修改和删除全局自定义关键词规则；规则可选择全部 18 种样式，较长关键词优先，自定义规则优先于内置规则，手动标注保持最高优先级
+- 自定义关键词规则随本地草稿和 SkillPack v1 JSON 保存，旧版无规则字段的 v1 文件仍兼容
 
 关键文件：
 
@@ -61,6 +63,8 @@
 - 1x/2x PNG 导出
 
 ### 字体与底部数值
+
+完整问题记录与排查方法见 [`docs/FONT_RENDERING.md`](C:/Code/Endfield_skill_pic/docs/FONT_RENDERING.md)。
 
 - 正文：`HarmonyOS Sans SC Regular`，`14.8px`，行高 `1.22`，颜色 `#D6D6D6`，无文字描边。
 - 标题、Rank、类型等中文 UI：优先使用游戏资源中的 `defaultfont_cn.ttf`（CSS 名称 `Endfield Default CN`）。
@@ -104,7 +108,7 @@ npm run build
 测试结果：
 
 - 3 个测试文件通过
-- 共 28 个测试通过
+- 共 34 个测试通过
 - TypeScript 检查通过
 - Vite 生产构建通过
 
@@ -147,7 +151,7 @@ npx tauri android build
 - 尚未实际构建 Android APK
 - 六张用户截图的 golden fixture 视觉测试尚未完全自动化
 - 需要继续根据新词条扩展 `AUTO_RULES` 和 `GAME_RICH_TEXT_LINKS`
-- HarmonyOS Sans SC 游戏 UI 字体已按许可嵌入；完整纹理和部分原始资源仍需获得许可后再替换
+- HarmonyOS Sans SC 字体及许可已嵌入；游戏提取的 `defaultfont_cn.ttf` 与 Novecento Webfont 不随公开仓库分发，使用者需合法取得后放入 `public/assets/fonts/`
 
 ## 推荐接手顺序
 

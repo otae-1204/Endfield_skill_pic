@@ -139,6 +139,61 @@ describe("rich text rules", () => {
     expect(tokensToText(parseRichText(text))).toBe(text);
   });
 
+  it("applies custom keyword styles before built-in automatic rules", () => {
+    const tokens = parseRichText("进入自定义状态并造成电磁伤害", [
+      { id: "custom-1", keyword: "自定义状态", style: "ba.fire" },
+      { id: "custom-2", keyword: "电磁伤害", style: "ba.vdown" },
+    ]);
+
+    expect(tokens.find((token) => token.text === "自定义状态")).toMatchObject({
+      style: "damage",
+      color: "#FF8E59",
+      source: "auto",
+    });
+    expect(tokens.find((token) => token.text === "电磁伤害")).toMatchObject({
+      style: "number",
+      color: "#FF8080",
+      source: "auto",
+    });
+  });
+
+  it("matches longer custom keywords first", () => {
+    const tokens = parseRichText("超级状态", [
+      { id: "short", keyword: "状态", style: "ba.key" },
+      { id: "long", keyword: "超级状态", style: "ba.heal" },
+    ]);
+
+    expect(tokens).toHaveLength(1);
+    expect(tokens[0]).toMatchObject({ text: "超级状态", color: "#B4D945" });
+  });
+
+  it("lets underline-only custom rules preserve the detected keyword color", () => {
+    const tokens = parseRichText("电磁伤害", [
+      { id: "underline", keyword: "电磁伤害", style: "underline" },
+    ]);
+
+    expect(tokens[0]).toMatchObject({
+      text: "电磁伤害",
+      color: "#FFCC00",
+      underline: true,
+      source: "auto",
+    });
+  });
+
+  it("keeps manual annotations above custom keyword rules", () => {
+    const manuallyStyled = applyManualPreset(parseRichText("核心词"), 0, 3, "ba.vdown");
+    const reparsed = updateRichTextPreservingManual(manuallyStyled, "核心词", [
+      { id: "custom", keyword: "核心词", style: "ba.heal" },
+    ]);
+
+    expect(reparsed[0]).toMatchObject({
+      text: "核心词",
+      manual: true,
+      manualStyleId: "ba.vdown",
+      color: "#FF8080",
+    });
+  });
+
   it("lets manual styling split and override automatic tokens", () => {
     const tokens = parseRichText("造成电磁伤害");
     const styled = applyManualStyle(tokens, 2, 4, "state");

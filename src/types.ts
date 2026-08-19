@@ -40,6 +40,12 @@ export const MANUAL_STYLE_IDS = [
 
 export type ManualStyleId = (typeof MANUAL_STYLE_IDS)[number];
 
+export type CustomKeywordRule = {
+  id: string;
+  keyword: string;
+  style: ManualStyleId;
+};
+
 export type RichToken = {
   text: string;
   style: TokenStyle;
@@ -81,6 +87,7 @@ export type RenderSettings = {
 export type SkillPack = {
   version: 1;
   cards: [SkillCard, SkillCard, SkillCard, SkillCard, SkillCard, SkillCard];
+  customKeywords: CustomKeywordRule[];
   render: RenderSettings;
 };
 

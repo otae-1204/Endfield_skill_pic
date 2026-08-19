@@ -1,6 +1,7 @@
 import { DEFAULT_PACK } from "../data/defaultPack";
 import {
   SLOT_IDS,
+  type CustomKeywordRule,
   type FooterRow,
   type SkillCard,
   type SkillPack,
@@ -62,10 +63,13 @@ function normalizeConsumeToken(token: RichToken): RichToken {
   };
 }
 
-function upgradeLegacyTokens(tokens: RichToken[]): RichToken[] {
+function upgradeLegacyTokens(
+  tokens: RichToken[],
+  customKeywords: CustomKeywordRule[],
+): RichToken[] {
   // Reparse every stored token array so old serialized colors and unknown-tag
   // fallbacks cannot override the current skill-panel palette.
-  let upgraded = parseRichText(tokensToEditorText(tokens));
+  let upgraded = parseRichText(tokensToEditorText(tokens), customKeywords);
   let offset = 0;
   for (const token of tokens) {
     const nextOffset = offset + token.text.length;
@@ -79,13 +83,17 @@ function upgradeLegacyTokens(tokens: RichToken[]): RichToken[] {
   return upgraded;
 }
 
-function normalizeCard(value: unknown, index: number): SkillCard {
+function normalizeCard(
+  value: unknown,
+  index: number,
+  customKeywords: CustomKeywordRule[],
+): SkillCard {
   const fallback = DEFAULT_PACK.cards[index];
   if (!isRecord(value)) return fallback;
 
   const bodyValue: RichToken[] = Array.isArray(value.body)
-    ? upgradeLegacyTokens(value.body.filter(isRecord).map(normalizeToken))
-    : parseRichText(typeof value.body === "string" ? value.body : "");
+    ? upgradeLegacyTokens(value.body.filter(isRecord).map(normalizeToken), customKeywords)
+    : parseRichText(typeof value.body === "string" ? value.body : "", customKeywords);
 
   const footerRows: FooterRow[] | undefined = Array.isArray(value.footerRows)
     ? value.footerRows
@@ -113,15 +121,26 @@ function normalizeCard(value: unknown, index: number): SkillCard {
 
 export function normalizePack(value: unknown): SkillPack {
   if (!isRecord(value)) return structuredClone(DEFAULT_PACK);
+  const customKeywords: CustomKeywordRule[] = Array.isArray(value.customKeywords)
+    ? value.customKeywords
+        .filter(isRecord)
+        .map((rule, index) => ({
+          id: typeof rule.id === "string" && rule.id ? rule.id : `custom-${index + 1}`,
+          keyword: typeof rule.keyword === "string" ? rule.keyword.trim() : "",
+          style: isManualStyleId(rule.style) ? rule.style : "plain",
+        }))
+        .filter((rule) => rule.keyword.length > 0)
+    : [];
   const cardValues = Array.isArray(value.cards) ? value.cards : null;
   const cards = cardValues
-    ? SLOT_IDS.map((_, index) => normalizeCard(cardValues[index], index))
+    ? SLOT_IDS.map((_, index) => normalizeCard(cardValues[index], index, customKeywords))
     : DEFAULT_PACK.cards;
   const renderValue = isRecord(value.render) ? value.render : {};
 
   return {
     version: 1,
     cards: cards as SkillPack["cards"],
+    customKeywords,
     render: {
       baseWidth: 360,
       scale: renderValue.scale === 2 ? 2 : 1,
@@ -137,6 +156,21 @@ export function validatePack(value: unknown): string[] {
   if (!Array.isArray(value.cards) || value.cards.length !== SLOT_IDS.length) {
     issues.push("必须包含固定的六张技能卡");
     return issues;
+  }
+
+  if (value.customKeywords !== undefined && !Array.isArray(value.customKeywords)) {
+    issues.push("自定义关键词规则格式不正确");
+  } else if (Array.isArray(value.customKeywords)) {
+    value.customKeywords.forEach((rule, index) => {
+      if (
+        !isRecord(rule) ||
+        typeof rule.keyword !== "string" ||
+        !rule.keyword.trim() ||
+        !isManualStyleId(rule.style)
+      ) {
+        issues.push(`第 ${index + 1} 条自定义关键词规则格式不正确`);
+      }
+    });
   }
 
   value.cards.forEach((card, index) => {

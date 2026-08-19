@@ -453,6 +453,10 @@ textarea:focus-visible {
 
 .field input,
 .footer-row-editor input,
+.keyword-rule-create input,
+.keyword-rule-create select,
+.keyword-rule-row input,
+.keyword-rule-row select,
 .body-input {
   width: 100%;
   border: 1px solid #293237;
@@ -463,7 +467,11 @@ textarea:focus-visible {
 }
 
 .field input,
-.footer-row-editor input {
+.footer-row-editor input,
+.keyword-rule-create input,
+.keyword-rule-create select,
+.keyword-rule-row input,
+.keyword-rule-row select {
   min-height: 35px;
   padding: 0 10px;
   font-size: 12px;
@@ -477,6 +485,10 @@ textarea:focus-visible {
 
 .field input:focus,
 .footer-row-editor input:focus,
+.keyword-rule-create input:focus,
+.keyword-rule-create select:focus,
+.keyword-rule-row input:focus,
+.keyword-rule-row select:focus,
 .body-input:focus {
   border-color: rgba(217, 255, 74, 0.55);
   box-shadow: 0 0 0 3px rgba(217, 255, 74, 0.06);
@@ -568,6 +580,65 @@ textarea:focus-visible {
   display: grid;
   grid-template-columns: 1fr 0.8fr 28px;
   gap: 6px;
+}
+
+.keyword-section {
+  display: grid;
+  gap: 10px;
+}
+
+.keyword-rule-create,
+.keyword-rule-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(104px, 0.8fr) 52px;
+  gap: 6px;
+}
+
+.keyword-rule-create select,
+.keyword-rule-row select {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #718087 50%),
+    linear-gradient(135deg, #718087 50%, transparent 50%);
+  background-position:
+    calc(100% - 12px) 14px,
+    calc(100% - 8px) 14px;
+  background-repeat: no-repeat;
+  background-size: 4px 4px;
+  color: #c3c9c8;
+}
+
+.keyword-rule-create select option,
+.keyword-rule-row select option {
+  background: #101518;
+  color: #e4e8e6;
+}
+
+.keyword-add-button {
+  min-height: 35px;
+  border: 1px solid rgba(217, 255, 74, 0.5);
+  border-radius: 2px;
+  background: rgba(217, 255, 74, 0.08);
+  color: var(--acid);
+  font-size: 10px;
+}
+
+.keyword-add-button:disabled {
+  border-color: var(--line);
+  background: #171d20;
+  color: #536066;
+  cursor: not-allowed;
+}
+
+.keyword-rule-list {
+  display: grid;
+  gap: 7px;
+}
+
+.keyword-rule-error {
+  margin: -3px 0 0;
+  color: #ff8e8e;
+  font-size: 9px;
 }
 
 .icon-button {

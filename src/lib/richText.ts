@@ -6,6 +6,7 @@ import {
 } from "../data/gameRichText";
 import {
   MANUAL_STYLE_IDS,
+  type CustomKeywordRule,
   type ManualStyleId,
   type RichToken,
   type TokenStyle,
@@ -220,7 +221,7 @@ function pushToken(tokens: RichToken[], token: RichToken): void {
   }
 }
 
-function autoTokenAt(text: string, index: number): { length: number; token: RichToken } {
+function builtInAutoTokenAt(text: string, index: number): { length: number; token: RichToken } {
   for (const rule of SORTED_AUTO_RULES) {
     if (!text.startsWith(rule.word, index)) continue;
     const meta = rule.richTextId
@@ -257,10 +258,49 @@ function autoTokenAt(text: string, index: number): { length: number; token: Rich
 
 type RichContext = RichToken & { tagKind?: "@" | "#"; richTextId: string };
 
-function parseAutomaticSegment(text: string, tokens: RichToken[]): void {
+function customTokenForRule(text: string, rule: CustomKeywordRule): RichToken {
+  const preset = MANUAL_STYLE_PRESETS[rule.style];
+  return {
+    text,
+    style: preset.style,
+    color: preset.color,
+    source: "auto",
+    ...(preset.underline ? { underline: true } : {}),
+    ...(preset.bold ? { bold: true } : {}),
+  };
+}
+
+function parseAutomaticSegment(
+  text: string,
+  tokens: RichToken[],
+  customRules: CustomKeywordRule[],
+): void {
   let index = 0;
   while (index < text.length) {
-    const match = autoTokenAt(text, index);
+    const customRule = customRules.find((rule) => text.startsWith(rule.keyword, index));
+    if (customRule) {
+      const preset = MANUAL_STYLE_PRESETS[customRule.style];
+      if (preset.preserveFormatting) {
+        const underlying: RichToken[] = [];
+        let customOffset = 0;
+        while (customOffset < customRule.keyword.length) {
+          const underlyingMatch = builtInAutoTokenAt(customRule.keyword, customOffset);
+          pushToken(underlying, {
+            ...underlyingMatch.token,
+            underline: true,
+            source: "auto",
+          });
+          customOffset += underlyingMatch.length;
+        }
+        underlying.forEach((token) => pushToken(tokens, token));
+      } else {
+        pushToken(tokens, customTokenForRule(customRule.keyword, customRule));
+      }
+      index += customRule.keyword.length;
+      continue;
+    }
+
+    const match = builtInAutoTokenAt(text, index);
     pushToken(tokens, match.token);
     index += match.length;
   }
@@ -274,9 +314,14 @@ function parseTaggedSegment(text: string, context: RichContext, tokens: RichToke
 const RICH_TAG_RE = /<image\s*=\s*"([^"]+)"(?:\s+scale\s*=\s*([\d.]+))?\s*\/?>|<([@#])([a-z0-9_.-]+)>|(<\/?b>)|<\/>/gi;
 
 /** Parse plain Chinese text and the API's <@id> / <#id> / <image="..."> syntax. */
-export function parseRichText(text: string): RichToken[] {
+export function parseRichText(text: string, customRules: CustomKeywordRule[] = []): RichToken[] {
   const tokens: RichToken[] = [];
   const stack: RichContext[] = [];
+  const sortedCustomRules = customRules
+    .filter((rule) => rule.keyword.length > 0 && MANUAL_STYLE_IDS.includes(rule.style))
+    .map((rule) => ({ ...rule, keyword: rule.keyword.trim() }))
+    .filter((rule) => rule.keyword.length > 0)
+    .sort((left, right) => right.keyword.length - left.keyword.length);
   let cursor = 0;
 
   for (const match of text.matchAll(RICH_TAG_RE)) {
@@ -285,7 +330,7 @@ export function parseRichText(text: string): RichToken[] {
     const segment = text.slice(cursor, index);
     const context = stack[stack.length - 1];
     if (context) parseTaggedSegment(segment, context, tokens);
-    else parseAutomaticSegment(segment, tokens);
+    else parseAutomaticSegment(segment, tokens, sortedCustomRules);
 
     const imageUrl = match[1];
     if (imageUrl) {
@@ -324,7 +369,7 @@ export function parseRichText(text: string): RichToken[] {
   const tail = text.slice(cursor);
   const context = stack[stack.length - 1];
   if (context) parseTaggedSegment(tail, context, tokens);
-  else parseAutomaticSegment(tail, tokens);
+  else parseAutomaticSegment(tail, tokens, sortedCustomRules);
   return tokens;
 }
 
@@ -379,8 +424,9 @@ function manualRanges(tokens: RichToken[]): ManualRange[] {
 export function updateRichTextPreservingManual(
   previousTokens: RichToken[],
   nextEditorText: string,
+  customRules: CustomKeywordRule[] = [],
 ): RichToken[] {
-  let nextTokens = parseRichText(nextEditorText);
+  let nextTokens = parseRichText(nextEditorText, customRules);
   const ranges = manualRanges(previousTokens);
   if (!ranges.length) return nextTokens;
 

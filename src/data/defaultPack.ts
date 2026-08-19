@@ -58,6 +58,7 @@ const draftCards: DraftCard[] = [
 
 export const DEFAULT_PACK: SkillPack = {
   version: 1,
+  customKeywords: [],
   cards: draftCards.map(({ body, ...card }) => ({
     ...card,
     body: parseRichText(body),

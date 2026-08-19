@@ -5,8 +5,9 @@ import { DEFAULT_PACK, SLOT_LABELS } from "./data/defaultPack";
 import { exportElementAsPng, filenameForCard } from "./lib/exportPng";
 import {
   applyManualPreset,
-  parseRichText,
+  tokensToEditorText,
   tokensToText,
+  updateRichTextPreservingManual,
 } from "./lib/richText";
 import {
   cardBodyText,
@@ -19,7 +20,14 @@ import {
   savePack,
   validatePack,
 } from "./lib/storage";
-import type { EditableCardPatch, ManualStyleId, SkillCard, SkillPack, SkillSlot } from "./types";
+import type {
+  CustomKeywordRule,
+  EditableCardPatch,
+  ManualStyleId,
+  SkillCard,
+  SkillPack,
+  SkillSlot,
+} from "./types";
 import "./styles.css";
 
 type Notice = {
@@ -99,6 +107,21 @@ export default function App() {
     },
     [],
   );
+
+  const updateCustomKeywords = useCallback((customKeywords: CustomKeywordRule[]) => {
+    setPack((current) => ({
+      ...current,
+      customKeywords,
+      cards: current.cards.map((card) => ({
+        ...card,
+        body: updateRichTextPreservingManual(
+          card.body,
+          tokensToEditorText(card.body),
+          customKeywords,
+        ),
+      })) as SkillPack["cards"],
+    }));
+  }, []);
 
   const handleSaved = useCallback((date: Date) => {
     setLastSavedAt(date);
@@ -255,10 +278,12 @@ export default function App() {
       <main className="app-main">
         <EditorPanel
           cards={cards}
+          customKeywords={pack.customKeywords}
           activeSlot={activeSlot}
           onSelect={setActiveSlot}
           onUpdate={updateCard}
           onApplyStyle={updateBodyStyle}
+          onCustomKeywordsChange={updateCustomKeywords}
         />
 
         <section className="preview-panel" aria-label="技能卡预览">
