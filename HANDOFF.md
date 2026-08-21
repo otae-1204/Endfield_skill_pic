@@ -19,6 +19,8 @@
 
 项目支持本地草稿、SkillPack v1 JSON 导入/导出，以及独立透明 PNG 导出。前端核心已放入 Tauri 2 壳中。
 
+项目来源、素材归属和再分发边界见 [`NOTICE.md`](C:/Code/Endfield_skill_pic/NOTICE.md)。这是非官方复刻工具：界面对照项目使用者提供的游戏截图、游戏内资料和参考页面制作；桌面图标是项目使用者提供的角色图片裁剪版本；富文本图标来自 FZ Wiki `game-richtext` 公开接口的本地快照；游戏字体和 Novecento 字体不随公开仓库分发。
+
 ## 已完成内容
 
 ### 富文本解析
@@ -128,13 +130,17 @@ npm run dev -- --host 127.0.0.1
 
 ## Tauri 构建
 
-项目已有 `src-tauri` 目录和 Tauri 配置，但尚未完成实际安装包构建。
+项目已有 `src-tauri` 目录和 Tauri 配置，已完成 Windows 便携 EXE 与 NSIS 安装包构建。发布构建会使用透明应用图标，并通过 Windows GUI 子系统隐藏控制台窗口。
 
 Windows：
 
 ```powershell
-npx tauri build
+$env:Path = "C:/Users/otae/.cargo/bin;" + $env:Path
+npx tauri build --bundles nsis
 ```
+
+发布产物位于 `src-tauri/target/release/skill-card-forge.exe` 和
+`src-tauri/target/release/bundle/nsis/六卡技能展示生成器_0.1.0_x64-setup.exe`。
 
 Android 首次初始化与构建：
 
@@ -147,7 +153,7 @@ npx tauri android build
 
 ## 尚未完成事项
 
-- 尚未实际构建 Windows EXE/MSI
+- MSI 打包依赖 WiX 工具链；当前已验证 NSIS 安装包和便携 EXE，发布时优先使用 NSIS
 - 尚未实际构建 Android APK
 - 六张用户截图的 golden fixture 视觉测试尚未完全自动化
 - 需要继续根据新词条扩展 `AUTO_RULES` 和 `GAME_RICH_TEXT_LINKS`

@@ -359,8 +359,10 @@ export default function App() {
         </section>
       </main>
 
-      <footer className="font-attribution">
-        本应用使用 HarmonyOS Sans 字体 · Copyright © 2021 Huawei Device Co., Ltd.
+      <footer className="font-attribution" aria-label="来源与归属">
+        <span>非官方复刻 · 视觉参考：用户提供的游戏截图、游戏内资料与终末地技能简览参考页面</span>
+        <span>图标：项目用户提供的角色图片裁剪 · 富文本图标：FZ Wiki game-richtext 公共快照</span>
+        <span>字体：HarmonyOS Sans SC · 游戏字体与 Novecento 需使用者自行合法取得</span>
       </footer>
 
       <div className={`notice notice-${notice.tone}`} role="status">

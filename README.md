@@ -4,6 +4,16 @@
 
 应用使用 React + TypeScript + Vite 离线运行，把普通攻击、战技、连携技、终结技和两个天赋节点的结构化数据渲染为技能简览卡片，并支持本地草稿、`SkillPack v1` JSON 和独立透明 PNG 导出。
 
+## 来源与归属
+
+这是一个非官方的个人还原工具，不代表《明日方舟：终末地》及其权利方。页面结构、颜色和排版来自项目使用者提供的游戏截图、游戏内资料以及 [终末地技能简览参考页面](https://zmd.xinjianya.top/) 的对照，不是官方源码。
+
+- 应用图标 `src-tauri/icons/endfield-character.png` 是项目使用者提供的角色图片裁剪后的透明版本；角色形象及原始图片的版权归原作者和相关权利方，本项目不主张所有权。
+- `public/assets/richtext/` 是 FZ Wiki `game-richtext` 接口公开 `iconPath` 的本地快照，仅用于离线还原富文本图标；对应语义和颜色映射见 `src/data/gameRichText.ts`。
+- `defaultfont_cn.ttf` 是从游戏资源取得的字体文件，Novecento 数字字体来自 Synthview / MyFonts；这两种字体不随公开仓库分发，使用者需自行确认授权并合法取得。HarmonyOS Sans SC 的许可见 [`public/assets/fonts/LICENSE-HarmonyOS-Sans.txt`](public/assets/fonts/LICENSE-HarmonyOS-Sans.txt)。
+
+更完整的素材和字体说明见 [`NOTICE.md`](NOTICE.md) 与 [`public/assets/README.md`](public/assets/README.md)。如需公开再分发包含原作角色图标或游戏资源的版本，请先取得相应权利方许可。
+
 ## 字体与数字渲染
 
 字体选择、已知问题和排查顺序详见 [`docs/FONT_RENDERING.md`](docs/FONT_RENDERING.md)。
@@ -53,7 +63,7 @@ npx tauri android init
 npx tauri android build
 ```
 
-Windows EXE/MSI 的图标与 Android 应用图标需要先提供有许可的源图，再执行 `npx tauri icon <source-image>`。当前仓库没有把参考游戏 logo 当作正式素材打包。
+Windows EXE/MSI 的图标与 Android 应用图标由 `src-tauri/icons/endfield-character.png` 生成；该文件是项目使用者提供的角色图片裁剪版本，来源与归属见 [`NOTICE.md`](NOTICE.md)。
 
 Tauri 的 Android 构建需要 Android SDK、NDK、Java 和 Rust Android targets；本机没有这些工具链时，网页预览、测试和静态构建仍然可以完整运行。第一版不配置 iOS，iOS 后续需要 macOS + Xcode。
 
