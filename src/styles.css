@@ -1317,7 +1317,7 @@ textarea:focus-visible {
   color: #9eb7ff;
 }
 
-.rich-token-link {
+.rich-token-underline {
   text-decoration-line: underline;
   text-decoration-style: dotted;
   text-decoration-thickness: 1px;

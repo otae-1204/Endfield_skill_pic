@@ -40,6 +40,8 @@
 - 已补充 FZ Wiki API 对应的本地图标，离线运行时不依赖外部网站
 - 支持用户添加、修改和删除全局自定义关键词规则；规则可选择全部 18 种样式，较长关键词优先，自定义规则优先于内置规则，手动标注保持最高优先级
 - 自定义关键词规则随本地草稿和 SkillPack v1 JSON 保存，旧版无规则字段的 v1 文件仍兼容
+- 自动识别的术语按 `skill_term_tag_mapping.md` 走 HyperlinkTextTable 语义（`<#...>`），因此破防、击飞、附着、异常及其子类会自动添加下划线；API 的 `<#...>` 和 `<@...>` 已区分处理，后者只应用直接样式，不因存在图标而自动加下划线
+- 已同步术语表中的法术附着/异常、物理异常、法术爆发、增幅/脆弱、连击与其他技能术语 ID；`ba.poise` 数值颜色更新为 `#FFAE6B`
 
 关键文件：
 
@@ -110,7 +112,7 @@ npm run build
 测试结果：
 
 - 3 个测试文件通过
-- 共 34 个测试通过
+- 共 40 个测试通过
 - TypeScript 检查通过
 - Vite 生产构建通过
 
@@ -156,7 +158,7 @@ npx tauri android build
 - MSI 打包依赖 WiX 工具链；当前已验证 NSIS 安装包和便携 EXE，发布时优先使用 NSIS
 - 尚未实际构建 Android APK
 - 六张用户截图的 golden fixture 视觉测试尚未完全自动化
-- 需要继续根据新词条扩展 `AUTO_RULES` 和 `GAME_RICH_TEXT_LINKS`
+- 后续若游戏新增术语，按 `skill_term_tag_mapping.md` 先补充 `GAME_RICH_TEXT_TERM_IDS`、离线样式元数据和对应 `AUTO_RULES`，并为 `<#>`/`<@>` 各补一条回归测试
 - HarmonyOS Sans SC 字体及许可已嵌入；游戏提取的 `defaultfont_cn.ttf` 与 Novecento Webfont 不随公开仓库分发，使用者需合法取得后放入 `public/assets/fonts/`
 
 ## 推荐接手顺序

@@ -70,7 +70,11 @@ function RichTokenView({ token, piece, pieceIndex }: { token: RichToken; piece: 
     fontWeight: token.bold ? 700 : undefined,
   };
   return (
-    <span className={tokenClass(token.style)} style={textStyle} data-manual={token.manual ? "true" : undefined}>
+    <span
+      className={`${tokenClass(token.style)}${token.underline ? " rich-token-underline" : ""}`}
+      style={textStyle}
+      data-manual={token.manual ? "true" : undefined}
+    >
       {pieceIndex === 0 && token.iconSrc ? (
         <img
           className="rich-token-icon"

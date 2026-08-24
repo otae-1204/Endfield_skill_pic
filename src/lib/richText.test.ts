@@ -67,8 +67,97 @@ describe("rich text rules", () => {
       source: "auto",
     });
     expect(tokens.find((token) => token.text === "法术异常")).toMatchObject({
+      richTextId: "ba.spellstatus",
       underline: true,
       source: "auto",
+    });
+  });
+
+  it("underlines automatic icon annotations and generic infliction/status terms", () => {
+    const names = ["破防", "击飞", "倒地", "碎甲", "猛击", "脆弱", "虚弱", "增幅", "附着", "异常"];
+    const tokens = parseRichText(names.join("、"));
+
+    for (const name of names) {
+      expect(tokens.find((token) => token.text === name)).toMatchObject({
+        underline: true,
+        source: "auto",
+      });
+    }
+  });
+
+  it("keeps direct style tags separate from underlined term tags", () => {
+    const tokens = parseRichText(
+      "<@ba.noguard>破防</>、<@ba.airborne>击飞</>、<#ba.crush>猛击</>",
+    );
+
+    const directGuard = tokens.find((token) => token.text === "破防");
+    expect(directGuard).toMatchObject({
+      tagKind: "@",
+      color: "#E3C19A",
+    });
+    expect(directGuard?.underline).toBeUndefined();
+    const directAirborne = tokens.find((token) => token.text === "击飞");
+    expect(directAirborne).toMatchObject({
+      tagKind: "@",
+      color: "#E3C19A",
+    });
+    expect(directAirborne?.underline).toBeUndefined();
+    expect(tokens.find((token) => token.text === "猛击")).toMatchObject({
+      tagKind: "#",
+      underline: true,
+      color: "#E3C19A",
+    });
+  });
+
+  it("uses the mapped term IDs for burst and secondary skill vocabulary", () => {
+    const tokens = parseRichText("物理异常、法术爆发、自然爆发、连击、重击、失衡节点、护盾、持续伤害");
+
+    expect(tokens.find((token) => token.text === "物理异常")).toMatchObject({
+      richTextId: "ba.physicalstatus",
+      color: "#E3C19A",
+      underline: true,
+    });
+    expect(tokens.find((token) => token.text === "法术爆发")).toMatchObject({
+      richTextId: "ba.spellburst",
+      color: "#33C2FF",
+      underline: true,
+    });
+    expect(tokens.find((token) => token.text === "自然爆发")).toMatchObject({
+      richTextId: "ba.naturalburst",
+      color: "#B4D945",
+      underline: true,
+    });
+    expect(tokens.find((token) => token.text === "重击")).toMatchObject({
+      richTextId: "ba.lastcombo",
+      underline: true,
+    });
+    expect(tokens.find((token) => token.text === "失衡节点")).toMatchObject({
+      richTextId: "ba.poiseknot",
+      underline: true,
+    });
+    expect(tokens.find((token) => token.text === "持续伤害")).toMatchObject({
+      richTextId: "ba.dot",
+      color: "#33C2FF",
+      underline: true,
+    });
+  });
+
+  it("resolves on-character term variants through the same palette", () => {
+    const tokens = parseRichText(
+      "<#ba.spellinflictonchar>受到法术附着</><#ba.fireonchar>受到灼热附着</><#ba.conductonchar>受到导电</>",
+    );
+
+    expect(tokens.find((token) => token.richTextId === "ba.spellinflictonchar")).toMatchObject({
+      color: "#33C2FF",
+      underline: true,
+    });
+    expect(tokens.find((token) => token.richTextId === "ba.fireonchar")).toMatchObject({
+      color: "#FF8E59",
+      underline: true,
+    });
+    expect(tokens.find((token) => token.richTextId === "ba.conductonchar")).toMatchObject({
+      color: "#FFCC00",
+      underline: true,
     });
   });
 
@@ -288,9 +377,19 @@ describe("rich text rules", () => {
     expect(consume?.color).toBeUndefined();
   });
 
+  it("does not underline a direct consume style unless the style defines it", () => {
+    const [consume] = parseRichText("<@ba.consume>状态消耗</>");
+
+    expect(consume).toMatchObject({
+      richTextId: "ba.consume",
+      tagKind: "@",
+    });
+    expect(consume.underline).toBeUndefined();
+  });
+
   it("uses the documented skill-panel preDef[0] palette", () => {
     const tokens = parseRichText(
-      "<@bl.key>关键</><@ba.vup>提升</><@ba.vdown>降低</><@ba.heal>治疗</><@ba.cryst>寒冷</><@ba.ether>以太</><@ba.info>说明</>",
+      "<@bl.key>关键</><@ba.vup>提升</><@ba.vdown>降低</><@ba.heal>治疗</><@ba.cryst>寒冷</><@ba.ether>以太</><@ba.info>说明</><@ba.poise>失衡</>",
     );
 
     expect(tokens.map(({ text, color }) => ({ text, color }))).toEqual([
@@ -301,6 +400,7 @@ describe("rich text rules", () => {
       { text: "寒冷", color: "#30D6E0" },
       { text: "以太", color: "#C59EFF" },
       { text: "说明", color: "#999999" },
+      { text: "失衡", color: "#FFAE6B" },
     ]);
   });
 
@@ -314,6 +414,14 @@ describe("rich text rules", () => {
     expect(separator).toMatchObject({ text: "|", style: "plain" });
     expect(term).toMatchObject({ text: "未知术语", style: "plain" });
     expect(term.color).toBeUndefined();
+  });
+
+  it("does not promote a direct style ID to a hyperlink term", () => {
+    const [token] = parseRichText("<#ba.key>普通关键词</>");
+
+    expect(token).toMatchObject({ text: "普通关键词", style: "plain" });
+    expect(token.color).toBeUndefined();
+    expect(token.underline).toBeUndefined();
   });
 
   it("uses weight 700 metadata only for explicit bold tags", () => {

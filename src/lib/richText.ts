@@ -74,63 +74,74 @@ type AutoRule = {
   style: TokenStyle;
   richTextId?: string;
   overrideStyle?: boolean;
-  underline?: boolean;
+  /** Treat an automatically found phrase as a HyperlinkTextTable term. */
+  term?: boolean;
 };
 
 const AUTO_RULES: AutoRule[] = [
-  { word: "电磁附着", style: "damage", richTextId: "ba.pulseinflict", underline: true },
-  { word: "灼热附着", style: "damage", richTextId: "ba.fireinflict", underline: true },
-  { word: "寒冷附着", style: "damage", richTextId: "ba.crystinflict", underline: true },
-  { word: "自然附着", style: "healing", richTextId: "ba.naturalinflict", underline: true },
+  { word: "电磁附着", style: "damage", richTextId: "ba.pulseinflict", term: true },
+  { word: "灼热附着", style: "damage", richTextId: "ba.fireinflict", term: true },
+  { word: "寒冷附着", style: "damage", richTextId: "ba.crystinflict", term: true },
+  { word: "自然附着", style: "healing", richTextId: "ba.naturalinflict", term: true },
   {
     word: "法术附着",
     style: "state",
     richTextId: "ba.spellinflict",
     overrideStyle: true,
-    underline: true,
+    term: true,
   },
-  { word: "电磁脆弱", style: "damage", richTextId: "ba.pulsevul" },
-  { word: "灼热脆弱", style: "damage", richTextId: "ba.firevul" },
-  { word: "寒冷脆弱", style: "damage", richTextId: "ba.crystvul" },
-  { word: "自然脆弱", style: "healing", richTextId: "ba.naturalvul" },
-  { word: "物理脆弱", style: "damage", richTextId: "ba.physicalvul" },
-  { word: "法术脆弱", style: "state", richTextId: "ba.spellvul" },
+  { word: "电磁脆弱", style: "damage", richTextId: "ba.pulsevul", term: true },
+  { word: "灼热脆弱", style: "damage", richTextId: "ba.firevul", term: true },
+  { word: "寒冷脆弱", style: "damage", richTextId: "ba.crystvul", term: true },
+  { word: "自然脆弱", style: "healing", richTextId: "ba.naturalvul", term: true },
+  { word: "物理脆弱", style: "damage", richTextId: "ba.physicalvul", term: true },
+  { word: "法术脆弱", style: "state", richTextId: "ba.spellvul", term: true },
   {
     word: "脆弱",
     style: "state",
     richTextId: "ba.vulnerable",
     overrideStyle: true,
+    term: true,
   },
-  { word: "虚弱", style: "state", richTextId: "ba.weak", overrideStyle: true },
-  { word: "缓速", style: "link", richTextId: "ba.slow", underline: true },
-  { word: "电磁增幅", style: "damage", richTextId: "ba.pulseenhance" },
-  { word: "灼热增幅", style: "damage", richTextId: "ba.fireenhance" },
-  { word: "寒冷增幅", style: "damage", richTextId: "ba.crystenhance" },
-  { word: "自然增幅", style: "healing", richTextId: "ba.naturalenhance" },
-  { word: "物理增幅", style: "damage", richTextId: "ba.physicalenhance" },
-  { word: "法术增幅", style: "state", richTextId: "ba.spellenhance" },
+  { word: "虚弱", style: "state", richTextId: "ba.weak", overrideStyle: true, term: true },
+  { word: "缓速", style: "link", richTextId: "ba.slow", term: true },
+  { word: "电磁增幅", style: "damage", richTextId: "ba.pulseenhance", term: true },
+  { word: "灼热增幅", style: "damage", richTextId: "ba.fireenhance", term: true },
+  { word: "寒冷增幅", style: "damage", richTextId: "ba.crystenhance", term: true },
+  { word: "自然增幅", style: "healing", richTextId: "ba.naturalenhance", term: true },
+  { word: "物理增幅", style: "damage", richTextId: "ba.physicalenhance", term: true },
+  { word: "法术增幅", style: "state", richTextId: "ba.spellenhance", term: true },
   {
     word: "附着",
     style: "state",
     richTextId: "ba.spellinflict",
     overrideStyle: true,
+    term: true,
   },
-  { word: "增幅", style: "state", richTextId: "ba.enhance", overrideStyle: true },
+  { word: "增幅", style: "state", richTextId: "ba.enhance", overrideStyle: true, term: true },
   { word: "电磁伤害", style: "damage", richTextId: "ba.pulse" },
   { word: "灼热伤害", style: "damage", richTextId: "ba.fire" },
   { word: "寒冷伤害", style: "damage", richTextId: "ba.cryst" },
   { word: "自然伤害", style: "healing", richTextId: "ba.natur" },
   { word: "物理伤害", style: "damage", richTextId: "ba.phy" },
   { word: "电磁", style: "damage", richTextId: "ba.pulse" },
-  { word: "导电", style: "damage", richTextId: "ba.conduct", underline: true },
-  { word: "腐蚀", style: "healing", richTextId: "ba.corrupt", underline: true },
-  { word: "燃烧", style: "damage", richTextId: "ba.burning", underline: true },
-  { word: "冻结", style: "damage", richTextId: "ba.frozen", underline: true },
-  { word: "破防", style: "state", richTextId: "ba.noguard" },
-  { word: "击飞", style: "state", richTextId: "ba.airborne" },
-  { word: "倒地", style: "state", richTextId: "ba.knockdown" },
-  { word: "碎甲", style: "state", richTextId: "ba.fracture" },
-  { word: "猛击", style: "state", richTextId: "ba.crush" },
+  { word: "导电", style: "damage", richTextId: "ba.conduct", term: true },
+  { word: "腐蚀", style: "healing", richTextId: "ba.corrupt", term: true },
+  { word: "燃烧", style: "damage", richTextId: "ba.burning", term: true },
+  { word: "冻结", style: "damage", richTextId: "ba.frozen", term: true },
+  { word: "碎冰", style: "damage", richTextId: "ba.crystbreak", term: true },
+  { word: "物理异常", style: "damage", richTextId: "ba.physicalstatus", term: true },
+  { word: "法术异常", style: "state", richTextId: "ba.spellstatus", term: true },
+  { word: "破防", style: "damage", richTextId: "ba.noguard", term: true },
+  { word: "击飞", style: "damage", richTextId: "ba.airborne", term: true },
+  { word: "倒地", style: "damage", richTextId: "ba.knockdown", term: true },
+  { word: "碎甲", style: "damage", richTextId: "ba.fracture", term: true },
+  { word: "猛击", style: "damage", richTextId: "ba.crush", term: true },
+  { word: "法术爆发", style: "state", richTextId: "ba.spellburst", term: true },
+  { word: "灼热爆发", style: "damage", richTextId: "ba.fireburst", term: true },
+  { word: "电磁爆发", style: "damage", richTextId: "ba.pulseburst", term: true },
+  { word: "寒冷爆发", style: "damage", richTextId: "ba.crystburst", term: true },
+  { word: "自然爆发", style: "healing", richTextId: "ba.naturalburst", term: true },
   { word: "失衡", style: "number", richTextId: "ba.poise" },
   { word: "治疗", style: "healing", richTextId: "ba.heal" },
   { word: "生命值", style: "healing", richTextId: "ba.heal" },
@@ -141,21 +152,27 @@ const AUTO_RULES: AutoRule[] = [
   { word: "易异", style: "state", richTextId: "ba.key" },
   { word: "易暴", style: "state", richTextId: "ba.key" },
   { word: "霜寒", style: "state", richTextId: "ba.key" },
-  { word: "异常等级", style: "state", richTextId: "ba.key" },
-  { word: "异常", style: "state", richTextId: "ba.key" },
+  { word: "异常等级", style: "state", richTextId: "ba.statuslevel", term: true },
+  { word: "异常", style: "state", richTextId: "ba.spellstatus", term: true },
   { word: "姿态", style: "state", richTextId: "ba.key" },
   { word: "状态", style: "state", richTextId: "ba.key" },
-  {
-    word: "法术异常",
-    style: "link",
-    richTextId: "ba.spellinflict",
-    underline: true,
-  },
-  { word: "重击", style: "link", richTextId: "ba.key" },
+  { word: "连击", style: "link", richTextId: "ba.combo", term: true },
+  { word: "重击", style: "link", richTextId: "ba.lastcombo", term: true },
+  { word: "失衡节点", style: "link", richTextId: "ba.poiseknot", term: true },
+  { word: "护盾", style: "link", richTextId: "ba.shield", term: true },
+  { word: "庇护", style: "link", richTextId: "ba.guard", term: true },
+  { word: "吸收", style: "link", richTextId: "ba.absorb", term: true },
+  { word: "净化", style: "link", richTextId: "ba.dispel", term: true },
+  { word: "加速", style: "link", richTextId: "ba.speedup", term: true },
+  { word: "持续伤害", style: "state", richTextId: "ba.dot", term: true },
+  { word: "状态消耗", style: "link", richTextId: "ba.consume", term: true },
+  { word: "返还技力", style: "link", richTextId: "ba.return", term: true },
+  { word: "源石结晶", style: "link", richTextId: "ba.originium", term: true },
+  { word: "伤害类型", style: "link", richTextId: "ba.spelldmg", term: true },
   { word: "战技", style: "link", richTextId: "ba.key" },
   { word: "连携技", style: "link", richTextId: "ba.key" },
   { word: "终结技", style: "link", richTextId: "ba.key" },
-  { word: "消耗", style: "link", richTextId: "ba.consume" },
+  { word: "消耗", style: "link", richTextId: "ba.consume", term: true },
 ];
 
 const SORTED_AUTO_RULES = [...AUTO_RULES].sort(
@@ -175,6 +192,7 @@ function tokenFromMeta(
     manual?: boolean;
     source?: RichToken["source"];
     tagKind?: "@" | "#";
+    hyperlink?: boolean;
   } = {},
 ): RichToken {
   const style = styleForMeta(meta, options.tagKind);
@@ -188,7 +206,14 @@ function tokenFromMeta(
   if (meta.iconSrc) token.iconSrc = meta.iconSrc;
   if (meta.iconScale !== undefined) token.iconScale = meta.iconScale;
   if (meta.color) token.color = meta.color;
-  if (meta.underline !== undefined) token.underline = meta.underline;
+  // Only HyperlinkTextTable terms receive the automatic hyperlink underline.
+  // A direct <@style> may contain an underline of its own, but an icon alone
+  // is not enough to make it a link (for example <@ba.airborne>).
+  if (options.hyperlink || meta.underline === true) {
+    token.underline = true;
+  } else if (meta.underline !== undefined) {
+    token.underline = meta.underline;
+  }
   if (meta.bold !== undefined) token.bold = meta.bold;
   if (options.source) token.source = options.source;
   return token;
@@ -225,13 +250,13 @@ function builtInAutoTokenAt(text: string, index: number): { length: number; toke
   for (const rule of SORTED_AUTO_RULES) {
     if (!text.startsWith(rule.word, index)) continue;
     const meta = rule.richTextId
-      ? lookupRichTextMeta(rule.richTextId, "@")
+      ? lookupRichTextMeta(rule.richTextId, rule.term ? "#" : "@")
       : { id: rule.word, semantic: rule.style, color: TOKEN_COLORS[rule.style] };
     const token = tokenFromMeta(text.slice(index, index + rule.word.length), meta, {
       source: "auto",
+      hyperlink: rule.term,
     });
     if (rule.overrideStyle) token.style = rule.style;
-    if (rule.underline) token.underline = true;
     return {
       length: rule.word.length,
       token,
