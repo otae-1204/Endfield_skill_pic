@@ -199,22 +199,31 @@ describe("rich text rules", () => {
     });
   });
 
-  it("auto-colors poise when it explicitly names a poise state", () => {
+  it("only auto-colors poise in an affected-target state description", () => {
     const tokens = parseRichText(
       '普通失衡文本不变；对处于"失衡"状态的敌人生效；目标进入失衡状态。',
     );
     const poiseStates = tokens.filter((token) => token.richTextId === "ba.poise");
 
-    expect(poiseStates).toHaveLength(2);
-    expect(poiseStates).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ text: "失衡", color: "#FFAE6B", source: "auto" }),
-      ]),
-    );
+    expect(poiseStates).toEqual([
+      expect.objectContaining({ text: "失衡", color: "#FFAE6B", source: "auto" }),
+    ]);
     expect(tokens[0]).toMatchObject({
       style: "plain",
     });
     expect(tokens[0].text).toContain("普通失衡文本不变");
+    expect(tokens.some((token) => token.style === "plain" && token.text.includes("目标进入失衡"))).toBe(
+      true,
+    );
+  });
+
+  it("keeps the basic-attack execution condition's poise wording plain", () => {
+    const tokens = parseRichText(
+      "处决攻击：\n附近有敌人处于失衡状态时使用普通攻击，将处决该敌人。",
+    );
+
+    expect(tokens.some((token) => token.richTextId === "ba.poise")).toBe(false);
+    expect(tokens.some((token) => token.style === "plain" && token.text.includes("失衡"))).toBe(true);
   });
 
   it("still honors an explicit poise style tag around non-numeric text", () => {

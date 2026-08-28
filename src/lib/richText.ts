@@ -250,8 +250,8 @@ function isPoiseStateAt(text: string, index: number): boolean {
   const prefix = text.slice(0, index);
   const suffix = text.slice(index + "失衡".length);
   return (
-    /(?:处于|进入)[“"'‘「『]?$/u.test(prefix) &&
-    /^[”"'’」』]?状态/u.test(suffix)
+    /对处于[“"'‘「『]?$/u.test(prefix) &&
+    /^[”"'’」』]?状态的/u.test(suffix)
   );
 }
 

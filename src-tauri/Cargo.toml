@@ -1,6 +1,6 @@
 [package]
 name = "skill-card-forge"
-version = "0.1.1"
+version = "0.1.2"
 description = "离线六卡技能展示生成器"
 authors = ["Skill Card Forge"]
 edition = "2021"
