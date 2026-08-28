@@ -4,9 +4,10 @@ import { SkillCardView } from "./components/SkillCard";
 import { DEFAULT_PACK, SLOT_LABELS } from "./data/defaultPack";
 import { exportElementAsPng, filenameForCard } from "./lib/exportPng";
 import {
-  applyManualStyle,
-  parseRichText,
+  applyManualPreset,
+  tokensToEditorText,
   tokensToText,
+  updateRichTextPreservingManual,
 } from "./lib/richText";
 import {
   cardBodyText,
@@ -19,7 +20,14 @@ import {
   savePack,
   validatePack,
 } from "./lib/storage";
-import type { EditableCardPatch, SkillCard, SkillPack, SkillSlot, TokenStyle } from "./types";
+import type {
+  CustomKeywordRule,
+  EditableCardPatch,
+  ManualStyleId,
+  SkillCard,
+  SkillPack,
+  SkillSlot,
+} from "./types";
 import "./styles.css";
 
 type Notice = {
@@ -87,12 +95,12 @@ export default function App() {
   }, []);
 
   const updateBodyStyle = useCallback(
-    (slot: SkillSlot, start: number, end: number, style: TokenStyle) => {
+    (slot: SkillSlot, start: number, end: number, style: ManualStyleId) => {
       setPack((current) => ({
         ...current,
         cards: current.cards.map((card) =>
           card.slot === slot
-            ? { ...card, body: applyManualStyle(card.body, start, end, style) }
+            ? { ...card, body: applyManualPreset(card.body, start, end, style) }
             : card,
         ) as SkillPack["cards"],
       }));
@@ -100,11 +108,37 @@ export default function App() {
     [],
   );
 
+  const updateCustomKeywords = useCallback((customKeywords: CustomKeywordRule[]) => {
+    setPack((current) => ({
+      ...current,
+      customKeywords,
+      cards: current.cards.map((card) => ({
+        ...card,
+        body: updateRichTextPreservingManual(
+          card.body,
+          tokensToEditorText(card.body),
+          customKeywords,
+        ),
+      })) as SkillPack["cards"],
+    }));
+  }, []);
+
   const handleSaved = useCallback((date: Date) => {
     setLastSavedAt(date);
   }, []);
 
   useDraftPersistence(pack, handleSaved);
+
+  useEffect(() => {
+    // Vite preserves component state across hot updates; migrate an already
+    // open older-width draft immediately when the card base width changes.
+    if (Number(pack.render.baseWidth) !== 360) {
+      setPack((current) => ({
+        ...current,
+        render: { ...current.render, baseWidth: 360 },
+      }));
+    }
+  }, [pack.render.baseWidth]);
 
   useEffect(() => {
     if (lastSavedAt) {
@@ -244,10 +278,12 @@ export default function App() {
       <main className="app-main">
         <EditorPanel
           cards={cards}
+          customKeywords={pack.customKeywords}
           activeSlot={activeSlot}
           onSelect={setActiveSlot}
           onUpdate={updateCard}
           onApplyStyle={updateBodyStyle}
+          onCustomKeywordsChange={updateCustomKeywords}
         />
 
         <section className="preview-panel" aria-label="技能卡预览">
@@ -323,8 +359,10 @@ export default function App() {
         </section>
       </main>
 
-      <footer className="font-attribution">
-        本应用使用 HarmonyOS Sans 字体 · Copyright © 2021 Huawei Device Co., Ltd.
+      <footer className="font-attribution" aria-label="来源与归属">
+        <span>非官方复刻 · 视觉参考：用户提供的游戏截图、游戏内资料与终末地技能简览参考页面</span>
+        <span>图标：项目用户提供的角色图片裁剪 · 富文本图标：FZ Wiki game-richtext 公共快照</span>
+        <span>字体：HarmonyOS Sans SC · 游戏字体与 Novecento 需使用者自行合法取得</span>
       </footer>
 
       <div className={`notice notice-${notice.tone}`} role="status">

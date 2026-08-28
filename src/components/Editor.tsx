@@ -1,31 +1,31 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
-import type { SkillCard, SkillSlot, TokenStyle } from "../types";
+import type { CustomKeywordRule, ManualStyleId, SkillCard, SkillSlot } from "../types";
 import {
-  parseRichText,
-  TOKEN_COLORS,
-  TOKEN_LABELS,
+  MANUAL_STYLE_OPTIONS,
+  MANUAL_STYLE_PRESETS,
   tokensToEditorText,
+  updateRichTextPreservingManual,
 } from "../lib/richText";
 import { SLOT_IDS } from "../types";
 
 type EditorProps = {
   cards: SkillCard[];
+  customKeywords: CustomKeywordRule[];
   activeSlot: SkillSlot;
   onSelect: (slot: SkillSlot) => void;
   onUpdate: (slot: SkillSlot, patch: Partial<SkillCard>) => void;
-  onApplyStyle: (slot: SkillSlot, start: number, end: number, style: TokenStyle) => void;
+  onApplyStyle: (slot: SkillSlot, start: number, end: number, style: ManualStyleId) => void;
+  onCustomKeywordsChange: (rules: CustomKeywordRule[]) => void;
 };
-
-const styleOptions: TokenStyle[] = ["damage", "state", "healing", "number", "link", "plain"];
 
 function StyleToolbar({
   textareaRef,
   onApply,
 }: {
   textareaRef: RefObject<HTMLTextAreaElement>;
-  onApply: (style: TokenStyle, start: number, end: number) => void;
+  onApply: (style: ManualStyleId, start: number, end: number) => void;
 }) {
-  const apply = (style: TokenStyle) => {
+  const apply = (style: ManualStyleId) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
     onApply(style, textarea.selectionStart, textarea.selectionEnd);
@@ -35,19 +35,22 @@ function StyleToolbar({
   return (
     <div className="style-toolbar" aria-label="富文本工具栏">
       <span className="toolbar-label">标注</span>
-      {styleOptions.map((style) => (
-        <button
-          key={style}
-          type="button"
-          className={`style-tool style-tool-${style}`}
-          onMouseDown={(event) => event.preventDefault()}
-          onClick={() => apply(style)}
-          title={`将选中文字标记为${TOKEN_LABELS[style]}`}
-        >
-          <i style={{ backgroundColor: TOKEN_COLORS[style] }} />
-          {TOKEN_LABELS[style]}
-        </button>
-      ))}
+      {MANUAL_STYLE_OPTIONS.map((style) => {
+        const preset = MANUAL_STYLE_PRESETS[style];
+        return (
+          <button
+            key={style}
+            type="button"
+            className={`style-tool style-tool-${style}`}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={() => apply(style)}
+            title={`将选中文字标记为${preset.label}`}
+          >
+            <i style={{ backgroundColor: preset.color }} />
+            {preset.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -163,7 +166,124 @@ function FooterEditor({
   );
 }
 
-export function EditorPanel({ cards, activeSlot, onSelect, onUpdate, onApplyStyle }: EditorProps) {
+function KeywordRuleEditor({
+  rules,
+  onChange,
+}: {
+  rules: CustomKeywordRule[];
+  onChange: (rules: CustomKeywordRule[]) => void;
+}) {
+  const [keyword, setKeyword] = useState("");
+  const [style, setStyle] = useState<ManualStyleId>("ba.key");
+  const normalizedKeyword = keyword.trim();
+  const duplicated = rules.some((rule) => rule.keyword === normalizedKeyword);
+
+  const addRule = () => {
+    if (!normalizedKeyword || duplicated) return;
+    onChange([
+      ...rules,
+      {
+        id: globalThis.crypto?.randomUUID?.() ?? `custom-${Date.now()}`,
+        keyword: normalizedKeyword,
+        style,
+      },
+    ]);
+    setKeyword("");
+  };
+
+  return (
+    <section className="editor-section keyword-section">
+      <div className="section-heading-row">
+        <div>
+          <span className="eyebrow">AUTO STYLE</span>
+          <h3>自定义关键词</h3>
+        </div>
+        <span className="hint-chip">{rules.length} 条规则</span>
+      </div>
+
+      <div className="keyword-rule-create">
+        <input
+          value={keyword}
+          placeholder="输入需要自动识别的关键词"
+          aria-label="新关键词"
+          onChange={(event) => setKeyword(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              addRule();
+            }
+          }}
+        />
+        <select
+          value={style}
+          aria-label="新关键词样式"
+          onChange={(event) => setStyle(event.target.value as ManualStyleId)}
+        >
+          {MANUAL_STYLE_OPTIONS.map((styleId) => (
+            <option key={styleId} value={styleId}>
+              {MANUAL_STYLE_PRESETS[styleId].label}
+            </option>
+          ))}
+        </select>
+        <button type="button" className="keyword-add-button" disabled={!normalizedKeyword || duplicated} onClick={addRule}>
+          添加
+        </button>
+      </div>
+      {duplicated ? <p className="keyword-rule-error">该关键词已经存在。</p> : null}
+
+      {rules.length ? (
+        <div className="keyword-rule-list">
+          {rules.map((rule, index) => (
+            <div className="keyword-rule-row" key={rule.id}>
+              <input
+                value={rule.keyword}
+                aria-label={`第 ${index + 1} 条关键词`}
+                onChange={(event) => {
+                  const nextKeyword = event.target.value;
+                  onChange(rules.map((item) => item.id === rule.id ? { ...item, keyword: nextKeyword } : item));
+                }}
+              />
+              <select
+                value={rule.style}
+                aria-label={`第 ${index + 1} 条关键词样式`}
+                onChange={(event) => {
+                  const nextStyle = event.target.value as ManualStyleId;
+                  onChange(rules.map((item) => item.id === rule.id ? { ...item, style: nextStyle } : item));
+                }}
+              >
+                {MANUAL_STYLE_OPTIONS.map((styleId) => (
+                  <option key={styleId} value={styleId}>
+                    {MANUAL_STYLE_PRESETS[styleId].label}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                className="icon-button danger"
+                aria-label={`删除关键词 ${rule.keyword}`}
+                onClick={() => onChange(rules.filter((item) => item.id !== rule.id))}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="empty-note">添加后会自动应用到全部六张卡片，较长关键词优先匹配。</p>
+      )}
+    </section>
+  );
+}
+
+export function EditorPanel({
+  cards,
+  customKeywords,
+  activeSlot,
+  onSelect,
+  onUpdate,
+  onApplyStyle,
+  onCustomKeywordsChange,
+}: EditorProps) {
   const card = cards.find((item) => item.slot === activeSlot) ?? cards[0];
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [bodyDraft, setBodyDraft] = useState(tokensToEditorText(card.body));
@@ -256,7 +376,11 @@ export function EditorPanel({ cards, activeSlot, onSelect, onUpdate, onApplyStyl
             onChange={(event) => {
               setBodyDraft(event.target.value);
               onUpdate(card.slot, {
-                body: parseRichText(event.target.value),
+                body: updateRichTextPreservingManual(
+                  card.body,
+                  event.target.value,
+                  customKeywords,
+                ),
               });
             }}
             spellCheck={false}
@@ -264,6 +388,8 @@ export function EditorPanel({ cards, activeSlot, onSelect, onUpdate, onApplyStyl
           />
           <p className="editor-help">可直接粘贴 &lt;@ba.pulse&gt;电磁伤害&lt;/&gt; 或 &lt;image=&quot;...&quot; /&gt; 标签；普通中文关键词也会自动着色并显示对应图标。</p>
         </section>
+
+        <KeywordRuleEditor rules={customKeywords} onChange={onCustomKeywordsChange} />
 
         <section className="editor-section">
           <FooterEditor

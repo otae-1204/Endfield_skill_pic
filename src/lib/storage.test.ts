@@ -31,7 +31,37 @@ describe("SkillPack v1", () => {
     const parsed = JSON.parse(json) as typeof DEFAULT_PACK;
     expect(parsed.version).toBe(1);
     expect(parsed.cards).toHaveLength(6);
-    expect(parsed.render.baseWidth).toBe(378);
+    expect(parsed.render.baseWidth).toBe(360);
+    expect(parsed.customKeywords).toEqual([]);
+  });
+
+  it("normalizes and applies custom keyword rules from stored packs", () => {
+    const normalized = normalizePack({
+      version: 1,
+      customKeywords: [
+        { id: "rule-1", keyword: "雷暴领域", style: "ba.pulse" },
+      ],
+      cards: [
+        { title: "自定义规则", typeLabel: "战技", body: "生成雷暴领域" },
+      ],
+    });
+
+    expect(normalized.customKeywords).toEqual([
+      { id: "rule-1", keyword: "雷暴领域", style: "ba.pulse" },
+    ]);
+    expect(normalized.cards[0].body.find((token) => token.text === "雷暴领域")).toMatchObject({
+      color: "#FFCC00",
+      source: "auto",
+    });
+  });
+
+  it("keeps old v1 packs without custom keyword rules compatible", () => {
+    const normalized = normalizePack({
+      version: 1,
+      cards: DEFAULT_PACK.cards,
+    });
+
+    expect(normalized.customKeywords).toEqual([]);
   });
 
   it("migrates legacy token arrays so new API icons appear in old drafts", () => {
@@ -75,5 +105,56 @@ describe("SkillPack v1", () => {
       underline: true,
     });
     expect(normalized.cards[0].body[0].color).toBeUndefined();
+  });
+
+  it("recolors serialized drafts with the current documented palette", () => {
+    const normalized = normalizePack({
+      version: 1,
+      cards: [
+        {
+          title: "旧颜色",
+          typeLabel: "天赋",
+          body: [{
+            text: "生命值",
+            style: "healing",
+            richTextId: "ba.heal",
+            color: "#ade131",
+            source: "auto",
+          }],
+        },
+      ],
+    });
+
+    expect(normalized.cards[0].body[0]).toMatchObject({
+      text: "生命值",
+      richTextId: "ba.heal",
+      color: "#B4D945",
+    });
+  });
+
+  it("preserves exact manual annotation presets in stored drafts", () => {
+    const normalized = normalizePack({
+      version: 1,
+      cards: [
+        {
+          title: "手动标注",
+          typeLabel: "战技",
+          body: [{
+            text: "灼热",
+            style: "damage",
+            manual: true,
+            manualStyleId: "ba.fire",
+            color: "#000000",
+            source: "manual",
+          }],
+        },
+      ],
+    });
+
+    expect(normalized.cards[0].body[0]).toMatchObject({
+      text: "灼热",
+      manualStyleId: "ba.fire",
+      color: "#FF8E59",
+    });
   });
 });

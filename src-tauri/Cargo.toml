@@ -1,6 +1,6 @@
 [package]
 name = "skill-card-forge"
-version = "0.1.0"
+version = "0.1.2"
 description = "离线六卡技能展示生成器"
 authors = ["Skill Card Forge"]
 edition = "2021"
@@ -14,4 +14,3 @@ tauri-build = { version = "2.0", features = [] }
 
 [dependencies]
 tauri = { version = "2.0", features = [] }
-

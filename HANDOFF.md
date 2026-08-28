@@ -1,4 +1,4 @@
-# 六卡技能展示生成器：项目交接
+# 《明日方舟：终末地》游戏内技能简览页面还原器：项目交接
 
 ## 项目位置
 
@@ -6,7 +6,9 @@
 
 ## 项目概况
 
-这是一个 React + TypeScript + Vite 技能卡展示生成器，固定渲染六种技能卡：
+本项目的明确目标是尽可能一比一复刻《明日方舟：终末地》游戏内技能悬浮简览页面，并把它做成可编辑、可导出、可复用的页面还原器，而不是通用技能卡生成器。
+
+项目基于 React + TypeScript + Vite，固定渲染六种技能卡：
 
 - 普通攻击
 - 战技
@@ -16,6 +18,8 @@
 - 天赋节点 B
 
 项目支持本地草稿、SkillPack v1 JSON 导入/导出，以及独立透明 PNG 导出。前端核心已放入 Tauri 2 壳中。
+
+项目来源、素材归属和再分发边界见 [`NOTICE.md`](C:/Code/Endfield_skill_pic/NOTICE.md)。这是非官方复刻工具：界面对照项目使用者提供的游戏截图、游戏内资料和参考页面制作；桌面图标是项目使用者提供的角色图片裁剪版本；富文本图标来自 FZ Wiki `game-richtext` 公开接口的本地快照；游戏字体和 Novecento 字体不随公开仓库分发。
 
 ## 已完成内容
 
@@ -34,6 +38,10 @@
   - 增幅、法术增幅
   - 电磁、灼热、寒冷、自然、物理对应的脆弱与增幅
 - 已补充 FZ Wiki API 对应的本地图标，离线运行时不依赖外部网站
+- 支持用户添加、修改和删除全局自定义关键词规则；规则可选择全部 18 种样式，较长关键词优先，自定义规则优先于内置规则，手动标注保持最高优先级
+- 自定义关键词规则随本地草稿和 SkillPack v1 JSON 保存，旧版无规则字段的 v1 文件仍兼容
+- 自动识别的术语按 `skill_term_tag_mapping.md` 走 HyperlinkTextTable 语义（`<#...>`），因此破防、击飞、附着、异常及其子类会自动添加下划线；API 的 `<#...>` 和 `<@...>` 已区分处理，后者只应用直接样式，不因存在图标而自动加下划线
+- 已同步术语表中的法术附着/异常、物理异常、法术爆发、增幅/脆弱、连击、庇护与其他技能术语 ID；`ba.poise` 数值和失衡节点使用 `preDef[0]` 的 `#FFAE6B`，`18点失衡` 只自动识别前置数值，普通“失衡”保持正文色，仅“对处于失衡状态的……”目标描述中的状态名使用失衡色，普攻处决触发条件中的“失衡”不着色
 
 关键文件：
 
@@ -46,7 +54,7 @@
 
 当前已实现：
 
-- 卡片基准宽度 378px
+- 卡片内部按 400px 编排，PNG 输出统一缩放为 360px 基准宽度
 - 内容超长自动增高
 - 深色背景、边框、分割线和透明圆角
 - 左上角黄色圆环与装饰贴图
@@ -57,6 +65,17 @@
 - 长条左侧约 33% 区域带 4 道不规则裂纹
 - 右上角双向上折线图标
 - 1x/2x PNG 导出
+
+### 字体与底部数值
+
+完整问题记录与排查方法见 [`docs/FONT_RENDERING.md`](C:/Code/Endfield_skill_pic/docs/FONT_RENDERING.md)。
+
+- 正文：`HarmonyOS Sans SC Regular`，`14.8px`，行高 `1.22`，颜色 `#D6D6D6`，无文字描边。
+- 标题、Rank、类型等中文 UI：优先使用游戏资源中的 `defaultfont_cn.ttf`（CSS 名称 `Endfield Default CN`）。
+- 底部数字：`Novecento Sans Wide Normal`，`21.5px`，使用普通数字形式，禁止 `tabular-nums`/`tnum`，否则数字 `1` 的字形会错误。
+- 中文单位：与数字拆分渲染，例如 `15秒` 会拆为 `15` 和 `秒`；“秒”使用 HarmonyOS Sans SC Regular，`18px`。
+- 右侧数值上移 `1px`，右边距 `9px`。
+- `defaultfont_cn.ttf` 和 Novecento Webfont 因授权/再分发限制不提交到公开仓库，需由使用者合法取得后放入 `public/assets/fonts/`。
 
 关键文件：
 
@@ -93,7 +112,7 @@ npm run build
 测试结果：
 
 - 3 个测试文件通过
-- 共 13 个测试通过
+- 共 45 个测试通过
 - TypeScript 检查通过
 - Vite 生产构建通过
 
@@ -113,13 +132,17 @@ npm run dev -- --host 127.0.0.1
 
 ## Tauri 构建
 
-项目已有 `src-tauri` 目录和 Tauri 配置，但尚未完成实际安装包构建。
+项目已有 `src-tauri` 目录和 Tauri 配置，已完成 Windows 便携 EXE 与 NSIS 安装包构建。发布构建会使用透明应用图标，并通过 Windows GUI 子系统隐藏控制台窗口。
 
 Windows：
 
 ```powershell
-npx tauri build
+$env:Path = "C:/Users/otae/.cargo/bin;" + $env:Path
+npx tauri build --bundles nsis
 ```
+
+发布产物位于 `src-tauri/target/release/skill-card-forge.exe` 和
+`src-tauri/target/release/bundle/nsis/六卡技能展示生成器_0.1.0_x64-setup.exe`。
 
 Android 首次初始化与构建：
 
@@ -132,11 +155,11 @@ npx tauri android build
 
 ## 尚未完成事项
 
-- 尚未实际构建 Windows EXE/MSI
+- MSI 打包依赖 WiX 工具链；当前已验证 NSIS 安装包和便携 EXE，发布时优先使用 NSIS
 - 尚未实际构建 Android APK
 - 六张用户截图的 golden fixture 视觉测试尚未完全自动化
-- 需要继续根据新词条扩展 `AUTO_RULES` 和 `GAME_RICH_TEXT_LINKS`
-- HarmonyOS Sans SC 游戏 UI 字体已按许可嵌入；完整纹理和部分原始资源仍需获得许可后再替换
+- 后续若游戏新增术语，按 `skill_term_tag_mapping.md` 先补充 `GAME_RICH_TEXT_TERM_IDS`、离线样式元数据和对应 `AUTO_RULES`，并为 `<#>`/`<@>` 各补一条回归测试
+- HarmonyOS Sans SC 字体及许可已嵌入；游戏提取的 `defaultfont_cn.ttf` 与 Novecento Webfont 不随公开仓库分发，使用者需合法取得后放入 `public/assets/fonts/`
 
 ## 推荐接手顺序
 

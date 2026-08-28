@@ -8,3 +8,9 @@ src-tauri/gen/
 *.tsbuildinfo
 vite.config.js
 vite.config.d.ts
+tmp/
+.playwright-cli/
+output/playwright/
+public/assets/fonts/NovecentoSansWideNormal.woff
+public/assets/fonts/NovecentoSansWideNormal.woff2
+public/assets/fonts/defaultfont_cn.ttf
