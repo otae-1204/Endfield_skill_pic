@@ -142,7 +142,6 @@ const AUTO_RULES: AutoRule[] = [
   { word: "电磁爆发", style: "damage", richTextId: "ba.pulseburst", term: true },
   { word: "寒冷爆发", style: "damage", richTextId: "ba.crystburst", term: true },
   { word: "自然爆发", style: "healing", richTextId: "ba.naturalburst", term: true },
-  { word: "失衡", style: "number", richTextId: "ba.poise" },
   { word: "治疗", style: "healing", richTextId: "ba.heal" },
   { word: "生命值", style: "healing", richTextId: "ba.heal" },
   { word: "恢复生命", style: "healing", richTextId: "ba.heal" },
@@ -246,7 +245,26 @@ function pushToken(tokens: RichToken[], token: RichToken): void {
   }
 }
 
+function isPoiseStateAt(text: string, index: number): boolean {
+  if (!text.startsWith("失衡", index)) return false;
+  const prefix = text.slice(0, index);
+  const suffix = text.slice(index + "失衡".length);
+  return (
+    /(?:处于|进入)[“"'‘「『]?$/u.test(prefix) &&
+    /^[”"'’」』]?状态/u.test(suffix)
+  );
+}
+
 function builtInAutoTokenAt(text: string, index: number): { length: number; token: RichToken } {
+  if (isPoiseStateAt(text, index)) {
+    return {
+      length: "失衡".length,
+      token: tokenFromMeta("失衡", lookupRichTextMeta("ba.poise", "@"), {
+        source: "auto",
+      }),
+    };
+  }
+
   for (const rule of SORTED_AUTO_RULES) {
     if (!text.startsWith(rule.word, index)) continue;
     const meta = rule.richTextId
@@ -260,6 +278,18 @@ function builtInAutoTokenAt(text: string, index: number): { length: number; toke
     return {
       length: rule.word.length,
       token,
+    };
+  }
+
+  const poiseAmount = text.slice(index).match(/^[+-]?\d+(?:\.\d+)?(?=点失衡)/u);
+  if (poiseAmount) {
+    return {
+      length: poiseAmount[0].length,
+      token: tokenFromMeta(
+        poiseAmount[0],
+        lookupRichTextMeta("ba.poise", "@"),
+        { source: "auto" },
+      ),
     };
   }
 

@@ -36,6 +36,7 @@ export const GAME_RICH_TEXT_COLORS = {
   "ba.phy": "#E3C19A",
   "ba.ether": "#C59EFF",
   "ba.info": "#999999",
+  "ba.poise": "#FFAE6B",
 } as const;
 
 const term = (
@@ -125,7 +126,11 @@ export const GAME_RICH_TEXT_STYLES: Record<string, GameRichTextMeta> = {
   "ba.pd": { id: "ba.pd", color: GAME_RICH_TEXT_COLORS["ba.phy"], semantic: "damage" },
   "ba.ether": { id: "ba.ether", color: GAME_RICH_TEXT_COLORS["ba.ether"], semantic: "state" },
   "ba.info": { id: "ba.info", color: GAME_RICH_TEXT_COLORS["ba.info"], semantic: "plain" },
-  "ba.poise": { id: "ba.poise", color: "#FFAE6B", semantic: "number" },
+  "ba.poise": {
+    id: "ba.poise",
+    color: GAME_RICH_TEXT_COLORS["ba.poise"],
+    semantic: "number",
+  },
   "ba.noguard": {
     id: "ba.noguard",
     color: GAME_RICH_TEXT_COLORS["ba.phy"],
@@ -193,7 +198,11 @@ export const GAME_RICH_TEXT_STYLES: Record<string, GameRichTextMeta> = {
   // inherit it unless the style itself explicitly defines one.
   "ba.consume": { id: "ba.consume", semantic: "plain" },
   "ba.lastcombo": term("ba.lastcombo", GAME_RICH_TEXT_COLORS["ba.key"], "link"),
-  "ba.poiseknot": term("ba.poiseknot", GAME_RICH_TEXT_COLORS["ba.key"], "link"),
+  "ba.poiseknot": term(
+    "ba.poiseknot",
+    GAME_RICH_TEXT_COLORS["ba.poise"],
+    "number",
+  ),
   "ba.statuslevel": term("ba.statuslevel"),
   "ba.shield": term("ba.shield", GAME_RICH_TEXT_COLORS["ba.key"], "link"),
   "ba.absorb": term("ba.absorb", GAME_RICH_TEXT_COLORS["ba.key"], "link"),

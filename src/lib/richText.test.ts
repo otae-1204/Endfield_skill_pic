@@ -110,7 +110,9 @@ describe("rich text rules", () => {
   });
 
   it("uses the mapped term IDs for burst and secondary skill vocabulary", () => {
-    const tokens = parseRichText("物理异常、法术爆发、自然爆发、连击、重击、失衡节点、护盾、持续伤害");
+    const tokens = parseRichText(
+      "物理异常、法术爆发、自然爆发、连击、重击、失衡节点、护盾、庇护、持续伤害",
+    );
 
     expect(tokens.find((token) => token.text === "物理异常")).toMatchObject({
       richTextId: "ba.physicalstatus",
@@ -127,18 +129,102 @@ describe("rich text rules", () => {
       color: "#B4D945",
       underline: true,
     });
+    expect(tokens.find((token) => token.text === "连击")).toMatchObject({
+      richTextId: "ba.combo",
+      color: "#33C2FF",
+      iconSrc: "/assets/richtext/4a3b9be9843bf8aa.png",
+      iconScale: 1.4,
+      underline: true,
+    });
     expect(tokens.find((token) => token.text === "重击")).toMatchObject({
       richTextId: "ba.lastcombo",
       underline: true,
     });
     expect(tokens.find((token) => token.text === "失衡节点")).toMatchObject({
       richTextId: "ba.poiseknot",
+      color: "#FFAE6B",
+      underline: true,
+    });
+    expect(tokens.find((token) => token.text === "庇护")).toMatchObject({
+      richTextId: "ba.guard",
+      color: "#33C2FF",
+      iconSrc: "/assets/richtext/cf8a140a31a7b731.png",
+      iconScale: 1.4,
       underline: true,
     });
     expect(tokens.find((token) => token.text === "持续伤害")).toMatchObject({
       richTextId: "ba.dot",
       color: "#33C2FF",
       underline: true,
+    });
+  });
+
+  it("recognizes explicit combo and guard term tags", () => {
+    const tokens = parseRichText("<#ba.combo>连击</>与<#ba.guard>庇护</>");
+
+    expect(tokens.find((token) => token.text === "连击")).toMatchObject({
+      richTextId: "ba.combo",
+      tagKind: "#",
+      iconSrc: "/assets/richtext/4a3b9be9843bf8aa.png",
+      underline: true,
+    });
+    expect(tokens.find((token) => token.text === "庇护")).toMatchObject({
+      richTextId: "ba.guard",
+      tagKind: "#",
+      iconSrc: "/assets/richtext/cf8a140a31a7b731.png",
+      underline: true,
+    });
+  });
+
+  it("only auto-colors poise amounts while leaving ordinary poise text plain", () => {
+    const tokens = parseRichText(
+      "造成18点失衡，额外造成+2.5点失衡；失衡值提高，对失衡的敌人生效，并跨过失衡节点。",
+    );
+
+    expect(tokens.filter((token) => token.richTextId === "ba.poise")).toEqual([
+      expect.objectContaining({ text: "18", color: "#FFAE6B", source: "auto" }),
+      expect.objectContaining({ text: "+2.5", color: "#FFAE6B", source: "auto" }),
+    ]);
+    expect(
+      tokens.some(
+        (token) =>
+          token.style === "plain" &&
+          token.text.includes("失衡值提高，对失衡的敌人生效"),
+      ),
+    ).toBe(true);
+    expect(tokens.find((token) => token.text === "失衡节点")).toMatchObject({
+      richTextId: "ba.poiseknot",
+      color: "#FFAE6B",
+      underline: true,
+    });
+  });
+
+  it("auto-colors poise when it explicitly names a poise state", () => {
+    const tokens = parseRichText(
+      '普通失衡文本不变；对处于"失衡"状态的敌人生效；目标进入失衡状态。',
+    );
+    const poiseStates = tokens.filter((token) => token.richTextId === "ba.poise");
+
+    expect(poiseStates).toHaveLength(2);
+    expect(poiseStates).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ text: "失衡", color: "#FFAE6B", source: "auto" }),
+      ]),
+    );
+    expect(tokens[0]).toMatchObject({
+      style: "plain",
+    });
+    expect(tokens[0].text).toContain("普通失衡文本不变");
+  });
+
+  it("still honors an explicit poise style tag around non-numeric text", () => {
+    const [token] = parseRichText("<@ba.poise>失衡</>");
+
+    expect(token).toMatchObject({
+      text: "失衡",
+      richTextId: "ba.poise",
+      tagKind: "@",
+      color: "#FFAE6B",
     });
   });
 
